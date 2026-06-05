@@ -213,10 +213,10 @@ const ResumeBuilder = () => {
   const downloadResume = async () => {
     try {
       const res = await api.get(`/resumes/${id}/download`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${formData.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.html`);
+      link.setAttribute('download', `${formData.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`);
       document.body.appendChild(link);
       link.click();
       link.remove();

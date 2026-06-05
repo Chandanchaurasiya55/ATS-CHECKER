@@ -1,6 +1,9 @@
 import Analysis from '../models/Analysis.js';
 import { analyzeText } from '../utils/atsAnalyzer.js';
 import fs from 'fs';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse');
 
 export const uploadAndAnalyze = async (req, res) => {
   try {
@@ -8,10 +11,23 @@ export const uploadAndAnalyze = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please upload a file' });
     }
 
-    // In a real app, we'd use something like pdf-parse here.
-    // Since we are mocking the file processing, we'll treat the file contents as generic text.
-    const mockText = "This is a resume for a Software Engineer with skills in React, Node.js, and MongoDB.";
-    const analysisResult = analyzeText(mockText);
+    let text = "";
+    
+    // Extract text based on file type
+    if (req.file.mimetype === 'application/pdf') {
+      const dataBuffer = fs.readFileSync(req.file.path);
+      const data = await pdfParse(dataBuffer);
+      text = data.text;
+    } else {
+      // For txt or others, read as utf8
+      text = fs.readFileSync(req.file.path, 'utf8');
+    }
+
+    if (!text || text.trim().length < 50) {
+      throw new Error("Could not extract enough text from the resume. Please ensure the file is not empty or corrupted.");
+    }
+
+    const analysisResult = analyzeText(text);
 
     const analysis = await Analysis.create({
       user: req.user.id,
