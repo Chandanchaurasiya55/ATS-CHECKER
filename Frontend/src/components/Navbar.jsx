@@ -32,6 +32,9 @@ const Navbar = () => {
             <Link to="/about" className="text-gray-600 hover:text-primary-600 font-bold transition-all">
               About
             </Link>
+            <Link to="/pricing" className="text-gray-600 hover:text-primary-600 font-bold transition-all">
+              Pricing
+            </Link>
             {!isAuthenticated && (
               <>
                 <Link to="/admin/login" className="text-gray-600 hover:text-primary-600 font-bold transition-all">
@@ -124,6 +127,13 @@ const Navbar = () => {
                   >
                     About
                   </Link>
+                  <Link 
+                    to="/pricing" 
+                    className="block text-xl font-bold text-gray-900" 
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Pricing
+                  </Link>
                   {user?.isAdmin && (
                     <Link 
                       to="/admin" 
@@ -169,6 +179,13 @@ const Navbar = () => {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     About
+                  </Link>
+                  <Link 
+                    to="/pricing" 
+                    className="block text-xl font-bold text-gray-900 text-center py-2" 
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Pricing
                   </Link>
                   <Link 
                     to="/admin/login" 

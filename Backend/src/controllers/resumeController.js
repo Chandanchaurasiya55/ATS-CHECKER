@@ -1,3 +1,4 @@
+// controllers/resumeController.js
 import Resume from '../models/Resume.js';
 import { analyzeATS } from '../utils/atsAnalyzer.js';
 import { generateHTMLResume } from '../utils/resumeTemplate.js';
@@ -11,14 +12,7 @@ export const createResume = async (req, res) => {
       user: req.user.id,
       atsScore: analysis.atsScore,
     });
-
-    res.status(201).json({
-      success: true,
-      data: {
-        resume,
-        analysis,
-      },
-    });
+    res.status(201).json({ success: true, data: { resume, analysis } });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -36,9 +30,8 @@ export const getMyResumes = async (req, res) => {
 export const getResumeById = async (req, res) => {
   try {
     const resume = await Resume.findById(req.params.id);
-    if (!resume || resume.user.toString() !== req.user.id) {
+    if (!resume || resume.user.toString() !== req.user.id)
       return res.status(404).json({ success: false, message: 'Resume not found' });
-    }
     res.json({ success: true, data: resume });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -48,9 +41,8 @@ export const getResumeById = async (req, res) => {
 export const updateResume = async (req, res) => {
   try {
     let resume = await Resume.findById(req.params.id);
-    if (!resume || resume.user.toString() !== req.user.id) {
+    if (!resume || resume.user.toString() !== req.user.id)
       return res.status(404).json({ success: false, message: 'Resume not found' });
-    }
 
     const analysis = analyzeATS(req.body);
     resume = await Resume.findByIdAndUpdate(
@@ -58,14 +50,7 @@ export const updateResume = async (req, res) => {
       { ...req.body, atsScore: analysis.atsScore },
       { new: true, runValidators: true }
     );
-
-    res.json({
-      success: true,
-      data: {
-        resume,
-        analysis,
-      },
-    });
+    res.json({ success: true, data: { resume, analysis } });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -74,11 +59,25 @@ export const updateResume = async (req, res) => {
 export const deleteResume = async (req, res) => {
   try {
     const resume = await Resume.findById(req.params.id);
-    if (!resume || resume.user.toString() !== req.user.id) {
+    if (!resume || resume.user.toString() !== req.user.id)
       return res.status(404).json({ success: false, message: 'Resume not found' });
-    }
     await resume.deleteOne();
     res.json({ success: true, message: 'Resume deleted' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const previewResume = async (req, res) => {
+  try {
+    const resume = await Resume.findById(req.params.id);
+    if (!resume || resume.user.toString() !== req.user.id)
+      return res.status(404).json({ success: false, message: 'Resume not found' });
+
+    // Template from query param or saved value
+    const template = req.query.template || resume.template || 'classic';
+    const html = generateHTMLResume(resume, template);
+    res.send(html);
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -87,106 +86,96 @@ export const deleteResume = async (req, res) => {
 export const downloadResume = async (req, res) => {
   try {
     const resume = await Resume.findById(req.params.id);
-    if (!resume || resume.user.toString() !== req.user.id) {
+    if (!resume || resume.user.toString() !== req.user.id)
       return res.status(404).json({ success: false, message: 'Resume not found' });
-    }
 
     const doc = new PDFDocument({ margin: 50 });
-    const fileName = `${resume.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`;
-
+    const fileName = `${(resume.personalInfo.fullName || 'Resume').replace(/\s+/g,'_')}_Resume.pdf`;
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-
     doc.pipe(res);
 
     // Header
-    doc.fillColor('#1e40af').fontSize(24).text(resume.personalInfo.fullName.toUpperCase(), { align: 'center' });
-    doc.moveDown(0.5);
-
-    // Contact Info
-    doc.fillColor('#555555').fontSize(10);
-    const contactLinks = [
+    doc.fillColor('#1e40af').fontSize(22).text(resume.personalInfo.fullName?.toUpperCase() || '', { align: 'center' });
+    doc.moveDown(0.4);
+    const contact = [
       resume.personalInfo.location,
       resume.personalInfo.email,
       resume.personalInfo.phone,
       resume.personalInfo.linkedin,
       resume.personalInfo.portfolio
     ].filter(Boolean).join('  |  ');
-    
-    doc.text(contactLinks, { align: 'center' });
+    doc.fillColor('#555').fontSize(9.5).text(contact, { align: 'center' });
+    doc.moveDown(0.8);
+    doc.strokeColor('#2563eb').lineWidth(1.5).moveTo(50, doc.y).lineTo(550, doc.y).stroke();
     doc.moveDown(1);
-    
-    doc.strokeColor('#2563eb').lineWidth(1).moveTo(50, doc.y).lineTo(550, doc.y).stroke();
-    doc.moveDown(1.5);
 
-    // Sections
-    const drawSectionTitle = (title) => {
-      doc.fillColor('#1e40af').fontSize(14).text(title.toUpperCase(), { underline: true });
-      doc.moveDown(0.5);
+    const section = (title) => {
+      doc.fillColor('#1e40af').fontSize(12).text(title.toUpperCase(), { underline: true });
+      doc.moveDown(0.4);
     };
 
-    // Summary
     if (resume.summary) {
-      drawSectionTitle('Professional Summary');
-      doc.fillColor('#333333').fontSize(10).text(resume.summary, { align: 'justify' });
-      doc.moveDown(1.5);
+      section('Professional Summary');
+      doc.fillColor('#333').fontSize(10).text(resume.summary, { align: 'justify' });
+      doc.moveDown(1);
     }
 
-    // Skills
-    if (resume.skills && resume.skills.length > 0) {
-      drawSectionTitle('Skills');
-      doc.fillColor('#333333').fontSize(10).text(resume.skills.join(', '));
-      doc.moveDown(1.5);
+    if (resume.skills?.length) {
+      section('Skills');
+      doc.fillColor('#333').fontSize(10).text(resume.skills.join('  ·  '));
+      doc.moveDown(1);
     }
 
-    // Experience
-    if (resume.experience && resume.experience.length > 0) {
-      drawSectionTitle('Professional Experience');
+    if (resume.experience?.length) {
+      section('Experience');
       resume.experience.forEach(exp => {
-        doc.fillColor('#000000').fontSize(11).text(exp.title, { continued: true })
-           .fillColor('#666666').fontSize(10).text(`  |  ${exp.startDate} - ${exp.endDate || 'Present'}`, { align: 'right' });
-        doc.fillColor('#444444').fontSize(10).font('Helvetica-Oblique').text(`${exp.company}${exp.location ? `, ${exp.location}` : ''}`);
-        doc.font('Helvetica'); // Reset to normal font
-        doc.moveDown(0.3);
-        doc.fillColor('#333333').fontSize(10).text(exp.description);
-        if (exp.achievements && exp.achievements.length > 0) {
-          exp.achievements.forEach(ach => {
-            doc.text(`• ${ach}`, { indent: 15 });
-          });
-        }
-        doc.moveDown(1);
+        doc.fillColor('#000').fontSize(11).font('Helvetica-Bold').text(exp.title || '');
+        doc.font('Helvetica');
+        doc.fillColor('#444').fontSize(10).font('Helvetica-Oblique')
+          .text(`${exp.company || ''}${exp.location ? ', ' + exp.location : ''}  |  ${exp.startDate || ''} – ${exp.endDate || 'Present'}`);
+        doc.font('Helvetica');
+        if (exp.description) { doc.fillColor('#333').fontSize(10).text(exp.description); doc.moveDown(0.2); }
+        exp.achievements?.filter(a=>a.trim()).forEach(a => doc.fillColor('#333').fontSize(10).text(`• ${a}`, { indent: 10 }));
+        doc.moveDown(0.8);
       });
     }
 
-    // Education
-    if (resume.education && resume.education.length > 0) {
-      drawSectionTitle('Education');
+    if (resume.education?.length) {
+      section('Education');
       resume.education.forEach(edu => {
-        doc.fillColor('#000000').fontSize(11).text(edu.degree, { continued: true })
-           .fillColor('#666666').fontSize(10).text(`  |  ${edu.graduationYear}`, { align: 'right' });
-        doc.fillColor('#444444').fontSize(10).font('Helvetica-Oblique').text(`${edu.institution}${edu.location ? `, ${edu.location}` : ''}`);
-        doc.font('Helvetica'); // Reset to normal font
-        if (edu.gpa) doc.text(`GPA: ${edu.gpa}`);
-        doc.moveDown(1);
+        doc.fillColor('#000').fontSize(11).font('Helvetica-Bold').text(edu.degree || '');
+        doc.font('Helvetica');
+        doc.fillColor('#444').fontSize(10).font('Helvetica-Oblique')
+          .text(`${edu.institution || ''}${edu.location ? ', ' + edu.location : ''}  |  ${edu.graduationYear || ''}${edu.gpa ? '  ·  GPA: ' + edu.gpa : ''}`);
+        doc.font('Helvetica');
+        doc.moveDown(0.8);
+      });
+    }
+
+    if (resume.projects?.length) {
+      section('Projects');
+      resume.projects.forEach(pr => {
+        doc.fillColor('#000').fontSize(11).font('Helvetica-Bold').text(pr.name || '');
+        doc.font('Helvetica');
+        if (pr.link) doc.fillColor('#2563eb').fontSize(9.5).text(pr.link);
+        if (pr.description) doc.fillColor('#333').fontSize(10).text(pr.description);
+        if (pr.technologies?.length) doc.fillColor('#555').fontSize(9.5).text(`Stack: ${pr.technologies.join(', ')}`);
+        doc.moveDown(0.8);
+      });
+    }
+
+    if (resume.certifications?.length) {
+      section('Certifications');
+      resume.certifications.forEach(c => {
+        doc.fillColor('#333').fontSize(10)
+          .text(`${c.name || ''}  —  ${c.issuer || ''}${c.date ? '  (' + c.date + ')' : ''}`);
       });
     }
 
     doc.end();
   } catch (error) {
-    console.error('PDF Generation Error:', error);
+    console.error('PDF error:', error);
     res.status(500).json({ success: false, message: 'Could not generate PDF' });
-  }
-};
-
-export const previewResume = async (req, res) => {
-  try {
-    const resume = await Resume.findById(req.params.id);
-    if (!resume || resume.user.toString() !== req.user.id) {
-      return res.status(404).json({ success: false, message: 'Resume not found' });
-    }
-    const html = generateHTMLResume(resume);
-    res.send(html);
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
   }
 };

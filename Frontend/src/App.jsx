@@ -10,6 +10,7 @@ import Builder from './pages/Builder.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
 import AdminRegister from './pages/AdminRegister.jsx';
 import AdminPanel from './pages/AdminPanel.jsx';
+import Pricing from './pages/Pricing.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 
 const ProtectedRoute = ({ children }) => {
@@ -43,6 +44,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/about" element={<About />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/register" element={<AdminRegister />} />
               <Route 
