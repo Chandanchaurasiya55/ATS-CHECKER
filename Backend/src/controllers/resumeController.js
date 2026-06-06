@@ -145,7 +145,8 @@ export const downloadResume = async (req, res) => {
       resume.experience.forEach(exp => {
         doc.fillColor('#000000').fontSize(11).text(exp.title, { continued: true })
            .fillColor('#666666').fontSize(10).text(`  |  ${exp.startDate} - ${exp.endDate || 'Present'}`, { align: 'right' });
-        doc.fillColor('#444444').fontSize(10).italic().text(`${exp.company}${exp.location ? `, ${exp.location}` : ''}`);
+        doc.fillColor('#444444').fontSize(10).font('Helvetica-Oblique').text(`${exp.company}${exp.location ? `, ${exp.location}` : ''}`);
+        doc.font('Helvetica'); // Reset to normal font
         doc.moveDown(0.3);
         doc.fillColor('#333333').fontSize(10).text(exp.description);
         if (exp.achievements && exp.achievements.length > 0) {
@@ -163,7 +164,8 @@ export const downloadResume = async (req, res) => {
       resume.education.forEach(edu => {
         doc.fillColor('#000000').fontSize(11).text(edu.degree, { continued: true })
            .fillColor('#666666').fontSize(10).text(`  |  ${edu.graduationYear}`, { align: 'right' });
-        doc.fillColor('#444444').fontSize(10).italic().text(`${edu.institution}${edu.location ? `, ${edu.location}` : ''}`);
+        doc.fillColor('#444444').fontSize(10).font('Helvetica-Oblique').text(`${edu.institution}${edu.location ? `, ${edu.location}` : ''}`);
+        doc.font('Helvetica'); // Reset to normal font
         if (edu.gpa) doc.text(`GPA: ${edu.gpa}`);
         doc.moveDown(1);
       });
