@@ -1,9 +1,7 @@
 import Analysis from '../models/Analysis.js';
 import { analyzeText } from '../utils/atsAnalyzer.js';
 import fs from 'fs';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse');
+import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 
 export const uploadAndAnalyze = async (req, res) => {
   try {
