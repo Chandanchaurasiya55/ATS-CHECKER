@@ -44,87 +44,95 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-10 px-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Resumes</h1>
-          <p className="text-gray-500 mt-1">Manage and edit your ATS-optimized resumes</p>
-        </div>
-        <Link to="/builder" className="btn-primary flex items-center gap-2">
-          <Plus className="w-5 h-5" /> Create New Resume
-        </Link>
+    <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <h1 className="text-4xl font-black text-gray-900 tracking-tight">My Resumes</h1>
+          <p className="text-gray-500 mt-2 text-lg">Manage and edit your ATS-optimized resumes</p>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <Link 
+            to="/builder" 
+            className="group inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-primary-500 transition-all hover:scale-105 shadow-lg shadow-primary-600/20"
+          >
+            <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" /> 
+            Create New Resume
+          </Link>
+        </motion.div>
       </div>
 
       {resumes.length === 0 ? (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center py-24 bg-white rounded-[2rem] border border-gray-100 shadow-sm"
         >
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
-            <FileText className="w-8 h-8" />
+          <div className="w-20 h-20 bg-primary-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-primary-600">
+            <FileText className="w-10 h-10" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No resumes found</h2>
-          <p className="text-gray-500 mb-8 max-w-sm mx-auto">
-            Get started by creating your first ATS-optimized resume in minutes.
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">No resumes yet</h2>
+          <p className="text-gray-500 mb-10 max-w-sm mx-auto">
+            Your dashboard is empty. Start building your high-scoring ATS resume today!
           </p>
-          <Link to="/builder" className="btn-primary inline-flex items-center gap-2">
-            Create Your First Resume <ArrowRight className="w-4 h-4" />
+          <Link 
+            to="/builder" 
+            className="inline-flex items-center gap-2 bg-gray-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-black transition-all"
+          >
+            Create Your First Resume <ArrowRight className="w-5 h-5" />
           </Link>
         </motion.div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {resumes.map((resume, idx) => (
             <motion.div
               key={resume._id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: idx * 0.05 }}
-              className="card group hover:border-primary-300 transition-all"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.1 }}
+              className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-primary-600/5 hover:-translate-y-1 transition-all group relative overflow-hidden"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600">
-                  <FileText className="w-6 h-6" />
-                </div>
+              <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={() => deleteResume(resume._id)}
-                  className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                  className="p-2.5 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors"
+                  title="Delete Resume"
                 >
                   <Trash2 className="w-5 h-5" />
                 </button>
               </div>
 
-              <h3 className="text-lg font-bold text-gray-900 group-hover:text-primary-600 transition-colors">
+              <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600 mb-6 group-hover:scale-110 transition-transform">
+                <FileText className="w-7 h-7" />
+              </div>
+
+              <h3 className="text-xl font-bold text-gray-900 mb-2 truncate pr-10">
                 {resume.personalInfo?.fullName || 'Untitled Resume'}
               </h3>
               
-              <div className="flex items-center gap-4 mt-4 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  {new Date(resume.updatedAt).toLocaleDateString()}
-                </div>
-                {resume.atsScore && (
-                  <div className="flex items-center gap-1 text-green-600 font-semibold">
-                    <Sparkles className="w-4 h-4" />
-                    Score: {resume.atsScore}
-                  </div>
-                )}
+              <div className="flex items-center gap-2 text-gray-400 text-sm mb-6">
+                <Calendar className="w-4 h-4" />
+                <span>Updated {new Date(resume.updatedAt).toLocaleDateString()}</span>
               </div>
 
-              <div className="mt-6 flex gap-3">
-                <Link to={`/builder/${resume._id}`} className="flex-1 btn-secondary text-sm py-2">
-                  Edit
-                </Link>
-                <button
-                  onClick={() => {
-                    // Logic to preview/download would go here
-                    // For now, let's just go to builder
-                    window.location.href = `/builder/${resume._id}`;
-                  }}
-                  className="flex-1 btn-primary text-sm py-2"
+              <div className="flex items-center justify-between mt-auto pt-6 border-t border-gray-50">
+                <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-sm font-bold">
+                  <Sparkles className="w-4 h-4" />
+                  Score: {resume.atsScore || 'N/A'}
+                </div>
+                
+                <Link
+                  to={`/builder/${resume._id}`}
+                  className="flex items-center gap-1 text-primary-600 font-bold hover:gap-2 transition-all"
                 >
-                  Preview
-                </button>
+                  Edit <ArrowRight className="w-4 h-4" />
+                </Link>
               </div>
             </motion.div>
           ))}
