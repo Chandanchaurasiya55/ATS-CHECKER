@@ -4,8 +4,12 @@ import Navbar from './components/Navbar.jsx';
 import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import About from './pages/About.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Builder from './pages/Builder.jsx';
+import AdminLogin from './pages/AdminLogin.jsx';
+import AdminRegister from './pages/AdminRegister.jsx';
+import AdminPanel from './pages/AdminPanel.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 
 const ProtectedRoute = ({ children }) => {
@@ -13,6 +17,15 @@ const ProtectedRoute = ({ children }) => {
   
   if (loading) return null;
   if (!user) return <Navigate to="/login" />;
+  
+  return children;
+};
+
+const AdminRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) return null;
+  if (!user?.isAdmin) return <Navigate to="/admin/login" />;
   
   return children;
 };
@@ -29,6 +42,17 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/register" element={<AdminRegister />} />
+              <Route 
+                path="/admin" 
+                element={
+                  <AdminRoute>
+                    <AdminPanel />
+                  </AdminRoute>
+                }
+              />
               <Route 
                 path="/dashboard" 
                 element={

@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import { FileText, LogOut, User, Menu, X } from 'lucide-react';
+import { FileText, LogOut, User, Menu, X, LayoutDashboard } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -29,29 +29,56 @@ const Navbar = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-8">
+            <Link to="/about" className="text-gray-600 hover:text-primary-600 font-bold transition-all">
+              About
+            </Link>
+            {!isAuthenticated && (
+              <>
+                <Link to="/admin/login" className="text-gray-600 hover:text-primary-600 font-bold transition-all">
+                  Admin Login
+                </Link>
+                <Link to="/admin/register" className="text-gray-600 hover:text-primary-600 font-bold transition-all">
+                  Admin Register
+                </Link>
+              </>
+            )}
             {isAuthenticated ? (
               <>
-                <Link to="/dashboard" className="text-gray-600 hover:text-primary-600 font-bold transition-all">
-                  Dashboard
-                </Link>
                 <Link to="/builder" className="text-gray-600 hover:text-primary-600 font-bold transition-all">
                   Resume Builder
                 </Link>
                 <div className="h-6 w-px bg-gray-200"></div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2 pr-2">
+
+                <div className="relative group">
+                  <div className="flex items-center gap-2 pr-2 cursor-default">
                     <div className="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold border-2 border-white shadow-sm">
                       {user?.name?.charAt(0).toUpperCase()}
                     </div>
                     <span className="text-sm font-bold text-gray-700">{user?.name}</span>
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                    title="Logout"
-                  >
-                    <LogOut className="w-5 h-5" />
-                  </button>
+
+                  <div className="absolute right-0 top-full mt-3 w-56 rounded-2xl bg-white border border-gray-100 shadow-xl p-2 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50">
+                    {user?.isAdmin && (
+                      <Link
+                        to="/admin"
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-semibold transition-colors"
+                      >
+                        <LayoutDashboard className="w-4 h-4" /> Admin Panel
+                      </Link>
+                    )}
+                    <Link
+                      to="/dashboard"
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-semibold transition-colors"
+                    >
+                      <LayoutDashboard className="w-4 h-4" /> Dashboard
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 font-semibold transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" /> Logout
+                    </button>
+                  </div>
                 </div>
               </>
             ) : (
@@ -91,6 +118,22 @@ const Navbar = () => {
               {isAuthenticated ? (
                 <>
                   <Link 
+                    to="/about" 
+                    className="block text-xl font-bold text-gray-900" 
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    About
+                  </Link>
+                  {user?.isAdmin && (
+                    <Link 
+                      to="/admin" 
+                      className="block text-xl font-bold text-gray-900" 
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Admin Panel
+                    </Link>
+                  )}
+                  <Link 
                     to="/dashboard" 
                     className="block text-xl font-bold text-gray-900" 
                     onClick={() => setMobileMenuOpen(false)}
@@ -120,6 +163,27 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
+                  <Link 
+                    to="/about" 
+                    className="block text-xl font-bold text-gray-900 text-center py-2" 
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    About
+                  </Link>
+                  <Link 
+                    to="/admin/login" 
+                    className="block text-xl font-bold text-gray-900 text-center py-2" 
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Admin Login
+                  </Link>
+                  <Link 
+                    to="/admin/register" 
+                    className="block text-xl font-bold text-gray-900 text-center py-2" 
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Admin Register
+                  </Link>
                   <Link 
                     to="/login" 
                     className="block text-xl font-bold text-gray-900 text-center py-2" 
