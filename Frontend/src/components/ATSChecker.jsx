@@ -72,10 +72,10 @@ const ATSChecker = () => {
     <div className="space-y-6">
       {/* Upload Area */}
       <div
-        className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 ${
+        className={`relative border-2 border-dashed rounded-2xl p-8 md:p-10 text-center transition-all duration-200 cursor-pointer ${
           dragActive
-            ? 'border-primary-500 bg-primary-50'
-            : 'border-gray-300 bg-white hover:border-primary-400'
+            ? 'border-primary-500 bg-primary-50/30'
+            : 'border-primary-300 bg-white hover:border-primary-400'
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -91,15 +91,15 @@ const ATSChecker = () => {
         />
         
         <label htmlFor="resume-upload" className="cursor-pointer block">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center">
-              <Upload className="w-8 h-8 text-primary-600" />
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-12 h-12 bg-primary-50 rounded-full flex items-center justify-center mb-1">
+              <Upload className="w-5 h-5 text-primary-600" />
             </div>
             <div>
-              <p className="text-lg font-semibold text-gray-700">
+              <p className="text-base font-semibold text-gray-700">
                 {file ? file.name : 'Drop your resume here or click to browse'}
               </p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs text-gray-400 mt-1 font-normal">
                 Supports PDF, DOC, DOCX, TXT (Max 5MB)
               </p>
             </div>
@@ -110,12 +110,16 @@ const ATSChecker = () => {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-4 flex items-center justify-center gap-2 text-sm text-primary-600 bg-primary-50 py-2 px-4 rounded-full inline-flex"
+            className="mt-4 flex items-center justify-center gap-2 text-xs text-primary-600 bg-primary-50 py-1.5 px-4 rounded-full inline-flex font-semibold"
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-3.5 h-3.5" />
             <span>{(file.size / 1024).toFixed(1)} KB</span>
             <button
-              onClick={() => setFile(null)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setFile(null);
+              }}
               className="ml-2 text-red-500 hover:text-red-700"
             >
               Remove

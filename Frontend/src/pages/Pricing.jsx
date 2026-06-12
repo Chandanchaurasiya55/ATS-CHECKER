@@ -65,17 +65,20 @@ const Pricing = () => {
       </div>
 
       {/* Pricing Cards Grid */}
-      <div className="grid gap-6 md:grid-cols-2 max-w-4xl mx-auto items-stretch px-2 relative">
-        {/* Free Plan Card */}
+      <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto items-stretch px-2 relative">
+        {/* Fresher Plan Card */}
         <div className="rounded-3xl border border-gray-200/80 bg-white p-5 md:p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
           <div>
             <span className="inline-flex items-center bg-gray-100 text-gray-700 text-xs font-semibold uppercase tracking-widest px-3 py-1.5 rounded-lg mb-3">
-              Free Plan
+              Fresher Plan
             </span>
             <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-semibold text-gray-900">₹0</span>
+              <span className="text-4xl font-semibold text-gray-900">₹49</span>
+              <span className="text-lg font-semibold text-gray-900">
+                /mo
+              </span>
             </div>
-            <p className="text-gray-500 font-normal mt-1 text-sm">Valid for 7 days</p>
+            <p className="text-gray-500 font-normal mt-1 text-sm">₹147 billed every 3 months</p>
 
             <ul className="mt-4 space-y-2">
               <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
@@ -109,7 +112,7 @@ const Pricing = () => {
           </Link>
         </div>
 
-        {/* Pro Plan Card */}
+        {/* Middle Plan Card (Highlighted) */}
         <div className="relative rounded-3xl border border-primary-100 bg-white p-5 md:p-6 shadow-2xl shadow-primary-100/60 flex flex-col justify-between transform transition-all duration-300 hover:scale-[1.01]">
           {/* Top highlight bar */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-t-3xl"></div>
@@ -120,14 +123,20 @@ const Pricing = () => {
                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary-600 p-0.5 text-white">
                   <Crown className="w-3 h-3 fill-white text-white" />
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-700">PRO QUARTERLY PLAN</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-700">Experience plan</span>
               </div>
+              <span className="bg-primary-100 text-primary-800 text-[10px] font-normal px-2 py-1 rounded-lg">
+                ₹636 - SAVE 25%
+              </span>
             </div>
 
             <div className="flex items-baseline gap-1 mt-3">
-              <span className="text-4xl font-semibold text-gray-900">₹299</span>
+              <span className="text-4xl font-semibold text-gray-900">₹159</span>
+              <span className="text-lg font-semibold text-gray-900">
+                /mo
+              </span>
             </div>
-            <p className="text-gray-500 font-normal mt-1 text-sm">₹1990 billed every 3 months</p>
+            <p className="text-gray-500 font-normal mt-1 text-sm">₹477 billed every 3 months</p>
 
             <div className="border-b border-gray-100 mt-4 mb-4"></div>
 
@@ -174,6 +183,75 @@ const Pricing = () => {
             Build My Resume
           </Link>
         </div>
+
+        {/* Executive Plan Card */}
+        <div className="rounded-3xl border border-gray-200/80 bg-white p-5 md:p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
+              <div className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary-600 p-0.5 text-white">
+                  <Crown className="w-3 h-3 fill-white text-white" />
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-700">Executive plan</span>
+              </div>
+              <span className="bg-primary-100 text-primary-800 text-[10px] font-normal px-2 py-1 rounded-lg">
+                ₹1197 - SAVE 25%
+              </span>
+            </div>
+
+            <div className="flex items-baseline gap-1 mt-3">
+              <span className="text-4xl font-semibold text-gray-900">₹299</span>
+              <span className="text-lg font-semibold text-gray-900">
+                /mo
+              </span>
+            </div>
+            <p className="text-gray-500 font-normal mt-1 text-sm">₹897 billed every 3 months</p>
+
+            <div className="border-b border-gray-100 mt-4 mb-4"></div>
+
+            <ul className="space-y-2">
+              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
+                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
+                <span>Unlimited resumes and cover letters</span>
+              </li>
+              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
+                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
+                <span>All resume templates</span>
+              </li>
+              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
+                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
+                <span>Priority real-time AI suggestions</span>
+              </li>
+              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
+                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
+                <span>Multi-target ATS check</span>
+              </li>
+              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
+                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
+                <span>Premium resume sections</span>
+              </li>
+              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
+                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
+                <span>No branding + Custom footer</span>
+              </li>
+              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
+                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
+                <span>Unlimited section items</span>
+              </li>
+              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
+                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
+                <span>Access to all design tools + updates</span>
+              </li>
+            </ul>
+          </div>
+
+          <Link
+            to={isAuthenticated ? "/builder" : "/register"}
+            className="mt-6 inline-flex w-full items-center justify-center rounded-xl border-2 border-gray-900 bg-white py-2.5 px-6 text-gray-900 font-semibold hover:bg-gray-900 hover:text-white transition-all duration-200 text-sm"
+          >
+            Build My Resume
+          </Link>
+        </div>
       </div>
 
       {/* Payment Badges Section */}
@@ -191,7 +269,12 @@ const Pricing = () => {
       {/* Connection Curve 1 (PayPal to Feature 1) */}
       <div className="hidden md:block max-w-4xl mx-auto relative h-28 -mt-6">
         <svg className="absolute left-[380px] top-0 w-64 h-32 text-gray-300 stroke-current stroke-2 fill-none" viewBox="0 0 256 128" xmlns="http://www.w3.org/2000/svg">
-          <path d="M 50 10 C 130 50, 150 -10, 200 110" strokeDasharray="6 6" />
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1.5 L 7 5 L 0 8.5 z" fill="currentColor" />
+            </marker>
+          </defs>
+          <path d="M 50 10 C 130 50, 150 -10, 195 105" strokeDasharray="6 6" markerEnd="url(#arrow)" />
         </svg>
       </div>
 
@@ -223,7 +306,12 @@ const Pricing = () => {
       {/* Connection Curve 2 (Feature 1 to Feature 2) */}
       <div className="hidden md:block max-w-4xl mx-auto relative h-28 -mt-6">
         <svg className="absolute left-[80px] top-0 w-64 h-32 text-gray-300 stroke-current stroke-2 fill-none" viewBox="0 0 256 128" xmlns="http://www.w3.org/2000/svg">
-          <path d="M 190 10 C 100 50, 120 -10, 30 110" strokeDasharray="6 6" />
+          <defs>
+            <marker id="arrow2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1.5 L 7 5 L 0 8.5 z" fill="currentColor" />
+            </marker>
+          </defs>
+          <path d="M 190 10 C 100 50, 120 -10, 35 105" strokeDasharray="6 6" markerEnd="url(#arrow2)" />
         </svg>
       </div>
 
