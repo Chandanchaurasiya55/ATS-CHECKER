@@ -59,7 +59,7 @@ const Footer = () => {
             <ul className="space-y-3 text-sm">
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-primary-500" />
-                <a href="mailto:support@atspro.com" className="hover:text-white transition-colors">support@atspro.com</a>
+                <a href="mailto:sale@buimbdigital.com" className="hover:text-white transition-colors">sale@buimbdigital.com</a>
               </li>
             </ul>
             <div className="flex items-center gap-4 pt-2">
@@ -68,9 +68,6 @@ const Footer = () => {
               </a>
               <a href="#" className="hover:text-white transition-colors text-gray-500">
                 <Linkedin className="w-5 h-5" />
-              </a>
-              <a href="#" className="hover:text-white transition-colors text-gray-500">
-                <Github className="w-5 h-5" />
               </a>
             </div>
           </div>
