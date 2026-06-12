@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FileText, BarChart3, Wand2, Shield, Zap, ArrowRight, CheckCircle, Search, Target, Award } from 'lucide-react';
+import { FileText, BarChart3, Wand2, Shield, Zap, ArrowRight, CheckCircle, Search, Target, Award, Star, MessageSquare } from 'lucide-react';
 import ATSChecker from '../components/ATSChecker.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import heroResumeMockup from '../assets/hero_resume_mockup.png';
 
 const Home = () => {
   const { isAuthenticated } = useAuth();
@@ -56,74 +57,76 @@ const Home = () => {
   return (
     <div className="overflow-x-hidden">
       {/* Hero Section */}
-      <section className="relative bg-[#fafafa] pt-24 pb-20 px-4 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-slate-50 via-white to-blue-50/20 pt-24 pb-20 px-4 overflow-hidden">
         {/* Background blobs */}
-        <div className="absolute top-0 -right-20 w-96 h-96 bg-primary-100/50 rounded-full blur-3xl -z-10 animate-pulse"></div>
-        <div className="absolute bottom-0 -left-20 w-96 h-96 bg-blue-100/30 rounded-full blur-3xl -z-10"></div>
+        <div className="absolute top-0 -right-20 w-96 h-96 bg-primary-100/30 rounded-full blur-3xl -z-10 animate-pulse-slow"></div>
+        <div className="absolute bottom-0 -left-20 w-96 h-96 bg-blue-100/20 rounded-full blur-3xl -z-10"></div>
 
-        <div className="max-w-7xl mx-auto text-center relative">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="inline-block px-4 py-1.5 mb-6 text-sm font-semibold tracking-wide text-primary-600 uppercase bg-primary-50 rounded-full"
-          >
-            AI-Powered Career Toolkit
-          </motion.div>
+        <div className="max-w-7xl mx-auto relative px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-left space-y-6"
+            >
+              <div className="inline-block px-4 py-1.5 text-sm font-semibold tracking-wide text-primary-600 uppercase bg-primary-50 rounded-full">
+                AI-Powered Career Toolkit
+              </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-gray-900 tracking-tight leading-[1.15]">
+                Land more interviews with ATSPro's <span className="text-primary-600">Resume Builder</span>
+              </h1>
+              <p className="text-lg text-gray-500 font-normal max-w-xl leading-relaxed">
+                ATS Check, AI Suggestions, and Smart Formatting make your resume stand out to recruiters instantly.
+              </p>
+              
+              <div className="flex flex-wrap gap-4 pt-2">
+                <Link
+                  to={isAuthenticated ? "/builder" : "/register"}
+                  className="inline-flex items-center justify-center bg-primary-600 text-white font-semibold px-6 py-3.5 rounded-xl hover:bg-primary-700 hover:scale-105 transition-all shadow-lg shadow-primary-200 text-base"
+                >
+                  Build Your Resume
+                </Link>
+                <a
+                  href="#checker"
+                  className="inline-flex items-center justify-center border-2 border-gray-900 bg-white text-gray-900 font-semibold px-6 py-3.5 rounded-xl hover:bg-gray-900 hover:text-white hover:scale-105 transition-all duration-200 text-base"
+                >
+                  Get Your Resume Score
+                </a>
+              </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 mb-6 leading-tight">
-              Beat the ATS. <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-blue-500">
-                Land Your Dream Job.
-              </span>
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-              Don't let algorithms block your path. Analyze your resume, get smart suggestions, 
-              and build a perfect resume with a guaranteed 91+ ATS score.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to={isAuthenticated ? "/builder" : "/register"}
-                className="group relative inline-flex items-center justify-center p-0.5 mb-2 mr-2 overflow-hidden text-sm font-medium text-white rounded-xl group bg-gradient-to-br from-primary-600 to-blue-500 hover:text-white focus:ring-4 focus:outline-none focus:ring-primary-200"
-              >
-                <span className="relative px-8 py-4 transition-all ease-in duration-75 text-lg font-bold flex items-center gap-2">
-                  {isAuthenticated ? 'Go to Builder' : 'Get Started Free'} <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </span>
-              </Link>
-              <a 
-                href="#checker" 
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-gray-900 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-all hover:border-gray-300"
-              >
-                Try Free Analyzer
-              </a>
-            </div>
-          </motion.div>
+              {/* Reviews & Stats Row */}
+              <div className="flex flex-wrap items-center gap-6 pt-6 border-t border-gray-100 text-sm text-gray-500 font-normal">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-emerald-500 text-emerald-500" />
+                    ))}
+                  </div>
+                  <span className="font-semibold text-gray-700">5,273 Reviews</span>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-gray-400" />
+                  <span><strong className="font-semibold text-gray-700">28,452 users</strong> landed interviews last month</span>
+                </div>
+              </div>
+            </motion.div>
 
-          {/* Stats */}
-          <div className="mt-20 grid grid-cols-2 lg:grid-cols-4 gap-8 max-w-4xl mx-auto">
-            {[
-              { value: '91+', label: 'Min ATS Score', icon: <Target className="w-5 h-5" /> },
-              { value: '250+', label: 'Templates Base', icon: <FileText className="w-5 h-5" /> },
-              { value: '10K+', label: 'Users Helped', icon: <Zap className="w-5 h-5" /> },
-              { value: '100%', label: 'Success Rate', icon: <CheckCircle className="w-5 h-5" /> },
-            ].map((stat, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + idx * 0.1 }}
-                className="flex flex-col items-center p-6 bg-white/50 backdrop-blur-sm rounded-2xl border border-gray-100 shadow-sm"
-              >
-                <div className="text-primary-600 mb-2">{stat.icon}</div>
-                <div className="text-2xl font-black text-gray-900">{stat.value}</div>
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">{stat.label}</div>
-              </motion.div>
-            ))}
+            {/* Right Visual Image */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="relative flex justify-center lg:justify-end"
+            >
+              <img
+                src={heroResumeMockup}
+                alt="ATSPro Resume Builder mockup showing resume with 85% ATS score check overlay"
+                className="rounded-2xl shadow-2xl max-w-full h-auto object-cover transform hover:scale-[1.02] transition-transform duration-300 border border-gray-100"
+              />
+            </motion.div>
           </div>
         </div>
       </section>
