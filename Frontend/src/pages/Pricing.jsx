@@ -14,7 +14,7 @@ const Pricing = () => {
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm hover:shadow-xl transition-shadow">
           <div className="text-sm font-semibold uppercase tracking-[0.3em] text-gray-500 mb-4">Free</div>
-          <div className="text-5xl font-black text-gray-900">$0</div>
+          <div className="text-5xl font-black text-gray-900">$49</div>
           <div className="mt-2 text-sm text-gray-500">forever</div>
           <ul className="mt-8 space-y-4 text-gray-600">
             <li>• 1 resume upload per month</li>
@@ -31,7 +31,7 @@ const Pricing = () => {
 
         <div className="rounded-[2rem] border border-primary-200 bg-primary-50 p-8 shadow-xl">
           <div className="text-sm font-semibold uppercase tracking-[0.3em] text-primary-700 mb-4">Pro</div>
-          <div className="text-5xl font-black text-gray-900">$9<span className="text-2xl font-medium">/mo</span></div>
+          <div className="text-5xl font-black text-gray-900">$99<span className="text-2xl font-medium">/mo</span></div>
           <div className="mt-2 text-sm text-gray-500">Most popular</div>
           <ul className="mt-8 space-y-4 text-gray-600">
             <li>• Unlimited resume uploads</li>
@@ -49,7 +49,7 @@ const Pricing = () => {
 
         <div className="rounded-[2rem] border border-gray-100 bg-white p-8 shadow-sm hover:shadow-xl transition-shadow">
           <div className="text-sm font-semibold uppercase tracking-[0.3em] text-gray-500 mb-4">Premium</div>
-          <div className="text-5xl font-black text-gray-900">$19<span className="text-2xl font-medium">/mo</span></div>
+          <div className="text-5xl font-black text-gray-900">$199<span className="text-2xl font-medium">/mo</span></div>
           <div className="mt-2 text-sm text-gray-500">Best for job seekers</div>
           <ul className="mt-8 space-y-4 text-gray-600">
             <li>• Everything in Pro</li>

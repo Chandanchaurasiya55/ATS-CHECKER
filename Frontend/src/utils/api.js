@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://ats-checker-rust-zeta.vercel.app/api',
+  baseURL: 'https://ats-checker-yybl.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
