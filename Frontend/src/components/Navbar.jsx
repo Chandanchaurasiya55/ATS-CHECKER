@@ -35,16 +35,7 @@ const Navbar = () => {
             <Link to="/pricing" className="text-gray-600 hover:text-primary-600 font-bold transition-all">
               Pricing
             </Link>
-            {!isAuthenticated && (
-              <>
-                <Link to="/admin/login" className="text-gray-600 hover:text-primary-600 font-bold transition-all">
-                  Admin Login
-                </Link>
-                <Link to="/admin/register" className="text-gray-600 hover:text-primary-600 font-bold transition-all">
-                  Admin Register
-                </Link>
-              </>
-            )}
+
             {isAuthenticated ? (
               <>
                 <Link to="/builder" className="text-gray-600 hover:text-primary-600 font-bold transition-all">
@@ -187,20 +178,7 @@ const Navbar = () => {
                   >
                     Pricing
                   </Link>
-                  <Link 
-                    to="/admin/login" 
-                    className="block text-xl font-bold text-gray-900 text-center py-2" 
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Admin Login
-                  </Link>
-                  <Link 
-                    to="/admin/register" 
-                    className="block text-xl font-bold text-gray-900 text-center py-2" 
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Admin Register
-                  </Link>
+
                   <Link 
                     to="/login" 
                     className="block text-xl font-bold text-gray-900 text-center py-2" 
