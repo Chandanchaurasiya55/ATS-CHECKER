@@ -31,6 +31,11 @@ const paymentSchema = new mongoose.Schema(
       enum: ['fresher', 'experience', 'executive'],
       required: true,
     },
+    billingCycle: {
+      type: String,
+      enum: ['monthly', 'quarterly'],
+      default: 'quarterly',
+    },
     status: {
       type: String,
       enum: ['pending', 'completed', 'failed'],

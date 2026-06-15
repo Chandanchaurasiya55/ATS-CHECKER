@@ -16,15 +16,24 @@ export const getPlans = async (req, res) => {
 // Create a Razorpay Order
 export const createOrder = async (req, res) => {
   try {
-    const { plan: planId } = req.body;
+    const { plan: planId, billingCycle = 'quarterly' } = req.body;
 
     if (!planId) {
       return res.status(400).json({ success: false, message: 'Plan ID is required' });
     }
 
+    if (!['monthly', 'quarterly'].includes(billingCycle)) {
+      return res.status(400).json({ success: false, message: 'Invalid billing cycle. Must be monthly or quarterly' });
+    }
+
     const plan = getPlanById(planId);
     if (!plan) {
       return res.status(404).json({ success: false, message: 'Plan not found' });
+    }
+
+    const pricing = plan.pricing[billingCycle];
+    if (!pricing) {
+      return res.status(400).json({ success: false, message: `Pricing details not found for cycle: ${billingCycle}` });
     }
 
     const keyId = process.env.RAZORPAY_KEY_ID?.trim();
@@ -43,7 +52,7 @@ export const createOrder = async (req, res) => {
     });
 
     const options = {
-      amount: plan.amountInPaise,
+      amount: pricing.amountInPaise,
       currency: 'INR',
       receipt: `receipt_order_${Date.now()}_${req.user.id.substring(0, 8)}`,
     };
@@ -54,9 +63,10 @@ export const createOrder = async (req, res) => {
     await Payment.create({
       userId: req.user.id,
       razorpayOrderId: order.id,
-      amount: plan.billingAmount,
+      amount: pricing.billingAmount,
       currency: 'INR',
       plan: planId,
+      billingCycle: billingCycle,
       status: 'pending',
     });
 
@@ -66,7 +76,13 @@ export const createOrder = async (req, res) => {
       amount: order.amount,
       currency: order.currency,
       keyId: keyId,
-      plan: plan,
+      plan: {
+        id: planId,
+        name: plan.name,
+        pricePerMonth: pricing.pricePerMonth,
+        billingAmount: pricing.billingAmount,
+        billingCycleName: pricing.billingCycleName,
+      },
     });
   } catch (error) {
     console.error('Create Order Error:', error);
@@ -130,9 +146,13 @@ export const verifyPayment = async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Set expiry date: 90 days from today
+    // Set expiry date dynamically based on plan configuration
+    const planDetails = getPlanById(payment.plan);
+    const pricing = planDetails?.pricing[payment.billingCycle || 'quarterly'];
+    const durationDays = pricing?.durationDays || 90;
+
     const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + 90);
+    expiryDate.setDate(expiryDate.getDate() + durationDays);
 
     user.plan = payment.plan;
     user.planStartDate = new Date();

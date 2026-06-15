@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Crown, Loader2 } from 'lucide-react';
+import { Check, Crown, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../utils/api.js';
 import toast from 'react-hot-toast';
@@ -63,70 +63,19 @@ const Pricing = () => {
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [payingPlan, setPayingPlan] = useState(null);
+  const [billingCycle, setBillingCycle] = useState('quarterly'); // 'monthly' or 'quarterly'
 
   useEffect(() => {
     const fetchPlans = async () => {
       try {
+        setError(null);
         const res = await api.get('/payments/plans');
         setPlans(res.data.data);
       } catch (err) {
-        console.error("Failed to fetch plans, using fallback details", err);
-        setPlans([
-          {
-            id: 'fresher',
-            name: 'Fresher Plan',
-            pricePerMonth: 49,
-            billingCycle: '3 months',
-            billingAmount: 147,
-            savings: null,
-            features: [
-              "All resume templates",
-              "Basic resume sections",
-              "ATSPro branding",
-              "Maximum 12 section items",
-              "Access to all design tools"
-            ]
-          },
-          {
-            id: 'experience',
-            name: 'Experience Plan',
-            pricePerMonth: 159,
-            billingCycle: '3 months',
-            billingAmount: 477,
-            savings: 'SAVE 25%',
-            totalValue: 636,
-            features: [
-              "300 resumes and cover letters",
-              "All resume templates",
-              "Real-time content suggestions",
-              "ATS check (Applicant Tracking System)",
-              "Pro resume sections",
-              "No branding",
-              "Unlimited section items",
-              "Thousands of design options"
-            ]
-          },
-          {
-            id: 'executive',
-            name: 'Executive Plan',
-            pricePerMonth: 299,
-            billingCycle: '3 months',
-            billingAmount: 897,
-            savings: 'SAVE 25%',
-            totalValue: 1197,
-            features: [
-              "Unlimited resumes and cover letters",
-              "All resume templates",
-              "Priority real-time AI suggestions",
-              "Multi-target ATS check",
-              "Premium resume sections",
-              "No branding + Custom footer",
-              "Unlimited section items",
-              "Access to all design tools + updates"
-            ]
-          }
-        ]);
+        console.error("Failed to fetch plans from backend:", err);
+        setError("Could not load pricing plans. Please check your internet connection.");
       } finally {
         setLoading(false);
       }
@@ -144,7 +93,7 @@ const Pricing = () => {
     setPayingPlan(planId);
 
     try {
-      const res = await api.post('/payments/create-order', { plan: planId });
+      const res = await api.post('/payments/create-order', { plan: planId, billingCycle });
       const { orderId, amount, currency, keyId, plan } = res.data;
 
       const scriptLoaded = await loadRazorpayScript();
@@ -159,7 +108,7 @@ const Pricing = () => {
         amount: amount,
         currency: currency,
         name: "ATS Resume Pro",
-        description: `${plan.name} - Billing: ₹${plan.billingAmount} / ${plan.billingCycle}`,
+        description: `${plan.name} - Billing: ₹${plan.billingAmount} / ${plan.billingCycleName}`,
         image: "https://cdn-icons-png.flaticon.com/512/2912/2912761.png",
         order_id: orderId,
         handler: async function (response) {
@@ -214,7 +163,7 @@ const Pricing = () => {
       <div className="absolute bottom-40 -left-40 w-[600px] h-[600px] bg-primary-100/20 rounded-full blur-3xl -z-10"></div>
 
       {/* Top Header */}
-      <div className="text-center mb-12 max-w-4xl mx-auto">
+      <div className="text-center mb-8 max-w-4xl mx-auto">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold text-gray-900 tracking-tight leading-[1.15] mb-8">
           Build a strikingly powerful<br />resume approved by recruiters
         </h1>
@@ -226,14 +175,70 @@ const Pricing = () => {
         </Link>
       </div>
 
+      {/* Billing Cycle Toggle */}
+      <div className="flex justify-center items-center mb-16">
+        <div className="bg-gray-100/80 backdrop-blur-md p-1.5 rounded-2xl flex items-center gap-1 border border-gray-200">
+          <button
+            onClick={() => setBillingCycle('monthly')}
+            className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+              billingCycle === 'monthly'
+                ? 'bg-white text-gray-900 shadow-md shadow-gray-200/50'
+                : 'text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            Monthly Billing
+          </button>
+          <button
+            onClick={() => setBillingCycle('quarterly')}
+            className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
+              billingCycle === 'quarterly'
+                ? 'bg-primary-600 text-white shadow-md shadow-primary-200/50'
+                : 'text-gray-500 hover:text-gray-900'
+            }`}
+          >
+            3-Months Billing
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
+              billingCycle === 'quarterly' ? 'bg-white text-primary-700' : 'bg-primary-100 text-primary-700'
+            }`}>
+              Save 25%
+            </span>
+          </button>
+        </div>
+      </div>
+
       {/* Pricing Cards Grid */}
       {loading ? (
         <div className="flex items-center justify-center min-h-[300px]">
           <Loader2 className="w-10 h-10 animate-spin text-primary-600" />
         </div>
+      ) : error ? (
+        <div className="max-w-md mx-auto text-center bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm flex flex-col items-center gap-3">
+          <AlertCircle className="w-12 h-12 text-red-600" />
+          <h3 className="text-lg font-bold text-gray-900">Failed to Load Pricing</h3>
+          <p className="text-gray-600 text-sm leading-relaxed">{error}</p>
+          <button
+            onClick={() => {
+              setLoading(true);
+              setError(null);
+              api.get('/payments/plans').then((res) => {
+                setPlans(res.data.data);
+                setLoading(false);
+              }).catch(() => {
+                setError("Could not load pricing plans. Please check your internet connection.");
+                setLoading(false);
+              });
+            }}
+            className="mt-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-all shadow-md shadow-red-200"
+          >
+            Try Again
+          </button>
+        </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto items-stretch px-2 relative">
           {plans.map((plan) => {
+            const pricing = plan.pricing[billingCycle];
+            if (!pricing) return null;
+
             const isHighlighted = plan.id === 'experience';
             const isUserCurrentPlan = user?.plan === plan.id;
             
@@ -283,18 +288,18 @@ const Pricing = () => {
                       </span>
                     )}
 
-                    {plan.savings && (
+                    {pricing.savings && (
                       <span className="bg-primary-100 text-primary-800 text-[10px] font-normal px-2 py-1 rounded-lg">
-                        {plan.totalValue ? `₹${plan.totalValue} - ` : ''}{plan.savings}
+                        {pricing.totalValue ? `₹${pricing.totalValue} - ` : ''}{pricing.savings}
                       </span>
                     )}
                   </div>
 
                   <div className="flex items-baseline gap-1 mt-3">
-                    <span className="text-4xl font-semibold text-gray-900">₹{plan.pricePerMonth}</span>
+                    <span className="text-4xl font-semibold text-gray-900">₹{pricing.pricePerMonth}</span>
                     <span className="text-lg font-semibold text-gray-900">/mo</span>
                   </div>
-                  <p className="text-gray-500 font-normal mt-1 text-sm">₹{plan.billingAmount} billed every {plan.billingCycle}</p>
+                  <p className="text-gray-500 font-normal mt-1 text-sm">₹{pricing.billingAmount} billed every {pricing.billingCycleName}</p>
 
                   <div className="border-b border-gray-100 mt-4 mb-4"></div>
 
