@@ -22,6 +22,9 @@ export const register = async (req, res) => {
         email: user.email,
         role: user.role,
         isAdmin: user.role === 'admin',
+        plan: user.plan || 'free',
+        planStartDate: user.planStartDate || null,
+        planExpiresAt: user.planExpiresAt || null,
       },
     });
   } catch (error) {
@@ -54,6 +57,9 @@ export const login = async (req, res) => {
         email: user.email,
         role: user.role,
         isAdmin: user.role === 'admin',
+        plan: user.plan || 'free',
+        planStartDate: user.planStartDate || null,
+        planExpiresAt: user.planExpiresAt || null,
       },
     });
   } catch (error) {
@@ -72,6 +78,9 @@ export const getMe = async (req, res) => {
         email: user.email,
         role: user.role,
         isAdmin: user.role === 'admin',
+        plan: user.plan || 'free',
+        planStartDate: user.planStartDate || null,
+        planExpiresAt: user.planExpiresAt || null,
       },
     });
   } catch (error) {

@@ -1,6 +1,9 @@
-import { Link } from 'react-router-dom';
-import { Check, Crown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Check, Crown, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import api from '../utils/api.js';
+import toast from 'react-hot-toast';
 import mockupImage from '../assets/resume_builder_mockup.png';
 import templatesPileImage from '../assets/resume_templates_pile.png';
 
@@ -41,8 +44,167 @@ const PaypalLogo = () => (
   </svg>
 );
 
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 const Pricing = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, refreshUser } = useAuth();
+  const navigate = useNavigate();
+  const [plans, setPlans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [payingPlan, setPayingPlan] = useState(null);
+
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const res = await api.get('/payments/plans');
+        setPlans(res.data.data);
+      } catch (err) {
+        console.error("Failed to fetch plans, using fallback details", err);
+        setPlans([
+          {
+            id: 'fresher',
+            name: 'Fresher Plan',
+            pricePerMonth: 49,
+            billingCycle: '3 months',
+            billingAmount: 147,
+            savings: null,
+            features: [
+              "All resume templates",
+              "Basic resume sections",
+              "ATSPro branding",
+              "Maximum 12 section items",
+              "Access to all design tools"
+            ]
+          },
+          {
+            id: 'experience',
+            name: 'Experience Plan',
+            pricePerMonth: 159,
+            billingCycle: '3 months',
+            billingAmount: 477,
+            savings: 'SAVE 25%',
+            totalValue: 636,
+            features: [
+              "300 resumes and cover letters",
+              "All resume templates",
+              "Real-time content suggestions",
+              "ATS check (Applicant Tracking System)",
+              "Pro resume sections",
+              "No branding",
+              "Unlimited section items",
+              "Thousands of design options"
+            ]
+          },
+          {
+            id: 'executive',
+            name: 'Executive Plan',
+            pricePerMonth: 299,
+            billingCycle: '3 months',
+            billingAmount: 897,
+            savings: 'SAVE 25%',
+            totalValue: 1197,
+            features: [
+              "Unlimited resumes and cover letters",
+              "All resume templates",
+              "Priority real-time AI suggestions",
+              "Multi-target ATS check",
+              "Premium resume sections",
+              "No branding + Custom footer",
+              "Unlimited section items",
+              "Access to all design tools + updates"
+            ]
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPlans();
+  }, []);
+
+  const handlePayment = async (planId) => {
+    if (!isAuthenticated) {
+      toast.error("Please login or register to buy a plan.");
+      navigate('/login?redirect=/pricing');
+      return;
+    }
+
+    setPayingPlan(planId);
+
+    try {
+      const res = await api.post('/payments/create-order', { plan: planId });
+      const { orderId, amount, currency, keyId, plan } = res.data;
+
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        toast.error("Failed to load Razorpay SDK. Please check your internet connection.");
+        setPayingPlan(null);
+        return;
+      }
+
+      const options = {
+        key: keyId,
+        amount: amount,
+        currency: currency,
+        name: "ATS Resume Pro",
+        description: `${plan.name} - Billing: ₹${plan.billingAmount} / ${plan.billingCycle}`,
+        image: "https://cdn-icons-png.flaticon.com/512/2912/2912761.png",
+        order_id: orderId,
+        handler: async function (response) {
+          const verifyToast = toast.loading("Verifying payment transaction...");
+          try {
+            const verifyRes = await api.post('/payments/verify-payment', {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            });
+
+            if (verifyRes.data.success) {
+              toast.success("Payment verified! Your account is upgraded.", { id: verifyToast });
+              await refreshUser();
+            }
+          } catch (err) {
+            console.error("Verification error:", err);
+            toast.error(err.response?.data?.message || "Payment verification failed. Please contact support.", { id: verifyToast });
+          } finally {
+            setPayingPlan(null);
+          }
+        },
+        prefill: {
+          name: user?.name || "",
+          email: user?.email || "",
+        },
+        theme: {
+          color: "#4f46e5",
+        },
+        modal: {
+          ondismiss: function () {
+            setPayingPlan(null);
+          }
+        }
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+
+    } catch (err) {
+      console.error("Payment initiation error:", err);
+      toast.error(err.response?.data?.message || "Failed to initiate payment. Please try again.");
+      setPayingPlan(null);
+    }
+  };
 
   return (
     <div className="relative bg-[#fafafa] overflow-hidden min-h-screen py-20 px-4 sm:px-6 lg:px-8">
@@ -65,194 +227,112 @@ const Pricing = () => {
       </div>
 
       {/* Pricing Cards Grid */}
-      <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto items-stretch px-2 relative">
-        {/* Fresher Plan Card */}
-        <div className="rounded-3xl border border-gray-200/80 bg-white p-5 md:p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-          <div>
-            <span className="inline-flex items-center bg-gray-100 text-gray-700 text-xs font-semibold uppercase tracking-widest px-3 py-1.5 rounded-lg mb-3">
-              Fresher Plan
-            </span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-semibold text-gray-900">₹49</span>
-              <span className="text-lg font-semibold text-gray-900">
-                /mo
-              </span>
-            </div>
-            <p className="text-gray-500 font-normal mt-1 text-sm">₹147 billed every 3 months</p>
-
-            <ul className="mt-4 space-y-2">
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4 h-4 text-gray-500 shrink-0" />
-                <span>All resume templates</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4 h-4 text-gray-500 shrink-0" />
-                <span>Basic resume sections</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4 h-4 text-gray-500 shrink-0" />
-                <span>ATSPro branding</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4 h-4 text-gray-500 shrink-0" />
-                <span>Maximum 12 section items</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4 h-4 text-gray-500 shrink-0" />
-                <span>Access to all design tools</span>
-              </li>
-            </ul>
-          </div>
-
-          <Link
-            to={isAuthenticated ? "/builder" : "/register"}
-            className="mt-6 inline-flex w-full items-center justify-center rounded-xl border-2 border-gray-900 bg-white py-2.5 px-6 text-gray-900 font-semibold hover:bg-gray-900 hover:text-white transition-all duration-200 text-sm"
-          >
-            Build My Resume
-          </Link>
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[300px]">
+          <Loader2 className="w-10 h-10 animate-spin text-primary-600" />
         </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-3 max-w-6xl mx-auto items-stretch px-2 relative">
+          {plans.map((plan) => {
+            const isHighlighted = plan.id === 'experience';
+            const isUserCurrentPlan = user?.plan === plan.id;
+            
+            let btnText = "Buy Plan";
+            let isDisabled = false;
 
-        {/* Middle Plan Card (Highlighted) */}
-        <div className="relative rounded-3xl border border-primary-100 bg-white p-5 md:p-6 shadow-2xl shadow-primary-100/60 flex flex-col justify-between transform transition-all duration-300 hover:scale-[1.01]">
-          {/* Top highlight bar */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-t-3xl"></div>
-          
-          <div>
-            <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
-              <div className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary-600 p-0.5 text-white">
-                  <Crown className="w-3 h-3 fill-white text-white" />
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-700">Experience plan</span>
+            if (isUserCurrentPlan) {
+              btnText = "Active Plan";
+              isDisabled = true;
+            } else if (isAuthenticated) {
+              if (plan.id === 'fresher' && (user?.plan === 'experience' || user?.plan === 'executive')) {
+                btnText = "Downgrade Contact Support";
+                isDisabled = true;
+              } else if (plan.id === 'experience' && user?.plan === 'executive') {
+                btnText = "Downgrade Contact Support";
+                isDisabled = true;
+              } else {
+                btnText = "Upgrade Plan";
+              }
+            }
+
+            return (
+              <div 
+                key={plan.id}
+                className={
+                  isHighlighted
+                    ? "relative rounded-3xl border border-primary-100 bg-white p-5 md:p-6 shadow-2xl shadow-primary-100/60 flex flex-col justify-between transform transition-all duration-300 hover:scale-[1.01]"
+                    : "rounded-3xl border border-gray-200/80 bg-white p-5 md:p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+                }
+              >
+                {isHighlighted && (
+                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary-500 to-primary-600 rounded-t-3xl"></div>
+                )}
+
+                <div>
+                  <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
+                    {isHighlighted ? (
+                      <div className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg">
+                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary-600 p-0.5 text-white">
+                          <Crown className="w-3 h-3 fill-white text-white" />
+                        </span>
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-700">{plan.name}</span>
+                      </div>
+                    ) : (
+                      <span className="inline-flex items-center bg-gray-100 text-gray-700 text-xs font-semibold uppercase tracking-widest px-3 py-1.5 rounded-lg">
+                        {plan.name}
+                      </span>
+                    )}
+
+                    {plan.savings && (
+                      <span className="bg-primary-100 text-primary-800 text-[10px] font-normal px-2 py-1 rounded-lg">
+                        {plan.totalValue ? `₹${plan.totalValue} - ` : ''}{plan.savings}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-baseline gap-1 mt-3">
+                    <span className="text-4xl font-semibold text-gray-900">₹{plan.pricePerMonth}</span>
+                    <span className="text-lg font-semibold text-gray-900">/mo</span>
+                  </div>
+                  <p className="text-gray-500 font-normal mt-1 text-sm">₹{plan.billingAmount} billed every {plan.billingCycle}</p>
+
+                  <div className="border-b border-gray-100 mt-4 mb-4"></div>
+
+                  <ul className="space-y-2">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
+                        <Check className={`w-4 h-4 shrink-0 ${isHighlighted ? 'text-primary-600' : 'text-gray-500'}`} />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <button
+                  onClick={() => !isDisabled && handlePayment(plan.id)}
+                  disabled={isDisabled || payingPlan === plan.id}
+                  className={`mt-6 inline-flex w-full items-center justify-center rounded-xl py-2.5 px-6 font-semibold transition-all duration-200 text-sm border-2 ${
+                    isDisabled 
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200"
+                      : isHighlighted
+                        ? "bg-primary-600 text-white border-primary-600 hover:bg-primary-700 hover:border-primary-700 shadow-lg shadow-primary-200 hover:scale-[1.02]"
+                        : "border-gray-900 bg-white text-gray-900 hover:bg-gray-900 hover:text-white"
+                  }`}
+                >
+                  {payingPlan === plan.id ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Connecting...
+                    </>
+                  ) : (
+                    btnText
+                  )}
+                </button>
               </div>
-              <span className="bg-primary-100 text-primary-800 text-[10px] font-normal px-2 py-1 rounded-lg">
-                ₹636 - SAVE 25%
-              </span>
-            </div>
-
-            <div className="flex items-baseline gap-1 mt-3">
-              <span className="text-4xl font-semibold text-gray-900">₹159</span>
-              <span className="text-lg font-semibold text-gray-900">
-                /mo
-              </span>
-            </div>
-            <p className="text-gray-500 font-normal mt-1 text-sm">₹477 billed every 3 months</p>
-
-            <div className="border-b border-gray-100 mt-4 mb-4"></div>
-
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>300 resumes and cover letters</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>All resume templates</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>Real-time content suggestions</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>ATS check (Applicant Tracking System)</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>Pro resume sections</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>No branding</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>Unlimited section items</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>Thousands of design options</span>
-              </li>
-            </ul>
-          </div>
-
-          <Link
-            to={isAuthenticated ? "/builder" : "/register"}
-            className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-primary-600 py-2.5 px-6 text-white font-semibold hover:bg-primary-700 transition-all duration-200 shadow-lg shadow-primary-200 hover:scale-[1.02] text-sm"
-          >
-            Build My Resume
-          </Link>
+            );
+          })}
         </div>
-
-        {/* Executive Plan Card */}
-        <div className="rounded-3xl border border-gray-200/80 bg-white p-5 md:p-6 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
-              <div className="flex items-center gap-1.5 bg-slate-100 px-2.5 py-1 rounded-lg">
-                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-primary-600 p-0.5 text-white">
-                  <Crown className="w-3 h-3 fill-white text-white" />
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-700">Executive plan</span>
-              </div>
-              <span className="bg-primary-100 text-primary-800 text-[10px] font-normal px-2 py-1 rounded-lg">
-                ₹1197 - SAVE 25%
-              </span>
-            </div>
-
-            <div className="flex items-baseline gap-1 mt-3">
-              <span className="text-4xl font-semibold text-gray-900">₹299</span>
-              <span className="text-lg font-semibold text-gray-900">
-                /mo
-              </span>
-            </div>
-            <p className="text-gray-500 font-normal mt-1 text-sm">₹897 billed every 3 months</p>
-
-            <div className="border-b border-gray-100 mt-4 mb-4"></div>
-
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>Unlimited resumes and cover letters</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>All resume templates</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>Priority real-time AI suggestions</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>Multi-target ATS check</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>Premium resume sections</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>No branding + Custom footer</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>Unlimited section items</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-gray-600 text-sm font-normal">
-                <Check className="w-4.5 h-4.5 text-primary-600 shrink-0" />
-                <span>Access to all design tools + updates</span>
-              </li>
-            </ul>
-          </div>
-
-          <Link
-            to={isAuthenticated ? "/builder" : "/register"}
-            className="mt-6 inline-flex w-full items-center justify-center rounded-xl border-2 border-gray-900 bg-white py-2.5 px-6 text-gray-900 font-semibold hover:bg-gray-900 hover:text-white transition-all duration-200 text-sm"
-          >
-            Build My Resume
-          </Link>
-        </div>
-      </div>
+      )}
 
       {/* Payment Badges Section */}
       <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 text-sm text-gray-500 font-semibold">

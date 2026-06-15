@@ -40,8 +40,25 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
   };
 
+  const refreshUser = async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const res = await api.get('/auth/me');
+        setUser(res.data.user);
+        setIsAuthenticated(true);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+      } catch (error) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setIsAuthenticated(false);
+        setUser(null);
+      }
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

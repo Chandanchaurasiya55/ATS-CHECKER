@@ -29,6 +29,17 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'admin'],
       default: 'user',
     },
+    plan: {
+      type: String,
+      enum: ['free', 'fresher', 'experience', 'executive'],
+      default: 'free',
+    },
+    planStartDate: {
+      type: Date,
+    },
+    planExpiresAt: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
