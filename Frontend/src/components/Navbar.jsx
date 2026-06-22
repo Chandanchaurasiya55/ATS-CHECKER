@@ -46,14 +46,14 @@ const Navbar = () => {
               <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 w-[480px] rounded-3xl bg-white border border-gray-100 shadow-2xl p-4 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50">
                 <div className="space-y-2">
                   {/* Recruitment */}
-                  <div className="flex items-start gap-3.5 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
+                  <Link to="/recruitment" className="flex items-start gap-3.5 p-3 rounded-2xl hover:bg-gray-50 transition-colors text-left block">
                     <div className="w-9 h-9 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 shrink-0">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
                     </div>
                     <div>
-                      <div className="flex items-center gap-1 text-primary-600 hover:text-primary-700 font-semibold cursor-pointer text-sm">
+                      <div className="flex items-center gap-1 text-primary-600 hover:text-primary-700 font-semibold text-sm">
                         Recruitment
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -63,17 +63,17 @@ const Navbar = () => {
                         ATSPro empowers your team to quickly create on-brand resumes that impress clients and land job interviews.
                       </p>
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Higher Education */}
-                  <div className="flex items-start gap-3.5 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
+                  <Link to="/higher-education" className="flex items-start gap-3.5 p-3 rounded-2xl hover:bg-gray-50 transition-colors text-left block">
                     <div className="w-9 h-9 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 shrink-0">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                       </svg>
                     </div>
                     <div>
-                      <div className="flex items-center gap-1 text-primary-600 hover:text-primary-700 font-semibold cursor-pointer text-sm">
+                      <div className="flex items-center gap-1 text-primary-600 hover:text-primary-700 font-semibold text-sm">
                         Higher Education
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -83,17 +83,17 @@ const Navbar = () => {
                         Get visibility into the job-search insights of your enrollments and support more students without adding headcount.
                       </p>
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Career Coaches */}
-                  <div className="flex items-start gap-3.5 p-3 rounded-2xl hover:bg-gray-50 transition-colors">
+                  <Link to="/career-coaches" className="flex items-start gap-3.5 p-3 rounded-2xl hover:bg-gray-50 transition-colors text-left block">
                     <div className="w-9 h-9 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 shrink-0">
                       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
                       </svg>
                     </div>
                     <div>
-                      <div className="flex items-center gap-1 text-primary-600 hover:text-primary-700 font-semibold cursor-pointer text-sm">
+                      <div className="flex items-center gap-1 text-primary-600 hover:text-primary-700 font-semibold text-sm">
                         Career Coaches
                         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -103,7 +103,7 @@ const Navbar = () => {
                         Cut your resume creation time in half, deliver delightful ATS friendly resumes.
                       </p>
                     </div>
-                  </div>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -216,7 +216,7 @@ const Navbar = () => {
                           className="pl-4 mt-2 space-y-4 border-l-2 border-primary-500 overflow-hidden"
                         >
                           <div className="py-2 space-y-4">
-                            <div>
+                            <Link to="/recruitment" className="block text-left" onClick={() => setMobileMenuOpen(false)}>
                               <div className="font-semibold text-primary-600 text-base flex items-center gap-1">
                                 Recruitment
                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -226,8 +226,8 @@ const Navbar = () => {
                               <p className="text-gray-500 text-xs mt-1 leading-normal font-normal">
                                 ATSPro empowers your team to quickly create on-brand resumes that impress clients and land job interviews.
                               </p>
-                            </div>
-                            <div>
+                            </Link>
+                            <Link to="/higher-education" className="block text-left" onClick={() => setMobileMenuOpen(false)}>
                               <div className="font-semibold text-primary-600 text-base flex items-center gap-1">
                                 Higher Education
                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -237,8 +237,8 @@ const Navbar = () => {
                               <p className="text-gray-500 text-xs mt-1 leading-normal font-normal">
                                 Get visibility into the job-search insights of your enrollments and support more students without adding headcount.
                               </p>
-                            </div>
-                            <div>
+                            </Link>
+                            <Link to="/career-coaches" className="block text-left" onClick={() => setMobileMenuOpen(false)}>
                               <div className="font-semibold text-primary-600 text-base flex items-center gap-1">
                                 Career Coaches
                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -248,7 +248,7 @@ const Navbar = () => {
                               <p className="text-gray-500 text-xs mt-1 leading-normal font-normal">
                                 Cut your resume creation time in half, deliver delightful ATS friendly resumes.
                               </p>
-                            </div>
+                            </Link>
                           </div>
                         </motion.div>
                       )}
@@ -330,7 +330,7 @@ const Navbar = () => {
                           className="mt-2 space-y-4 overflow-hidden bg-gray-50 rounded-2xl p-4 text-left"
                         >
                           <div className="space-y-4">
-                            <div>
+                            <Link to="/recruitment" className="block text-left" onClick={() => setMobileMenuOpen(false)}>
                               <div className="font-semibold text-primary-600 text-base flex items-center gap-1">
                                 Recruitment
                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -340,8 +340,8 @@ const Navbar = () => {
                               <p className="text-gray-500 text-xs mt-1 leading-normal font-normal">
                                 ATSPro empowers your team to quickly create on-brand resumes that impress clients and land job interviews.
                               </p>
-                            </div>
-                            <div>
+                            </Link>
+                            <Link to="/higher-education" className="block text-left" onClick={() => setMobileMenuOpen(false)}>
                               <div className="font-semibold text-primary-600 text-base flex items-center gap-1">
                                 Higher Education
                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -351,8 +351,8 @@ const Navbar = () => {
                               <p className="text-gray-500 text-xs mt-1 leading-normal font-normal">
                                 Get visibility into the job-search insights of your enrollments and support more students without adding headcount.
                               </p>
-                            </div>
-                            <div>
+                            </Link>
+                            <Link to="/career-coaches" className="block text-left" onClick={() => setMobileMenuOpen(false)}>
                               <div className="font-semibold text-primary-600 text-base flex items-center gap-1">
                                 Career Coaches
                                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -362,7 +362,7 @@ const Navbar = () => {
                               <p className="text-gray-500 text-xs mt-1 leading-normal font-normal">
                                 Cut your resume creation time in half, deliver delightful ATS friendly resumes.
                               </p>
-                            </div>
+                            </Link>
                           </div>
                         </motion.div>
                       )}

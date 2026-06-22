@@ -6,10 +6,11 @@ import {
   Loader2, Sparkles, CheckCircle, AlertCircle, Info,
   User as UserIcon, FileText as FileTextIcon, Zap as ZapIcon,
   Briefcase as BriefcaseIcon, GraduationCap as GraduationCapIcon,
-  Award as AwardIcon, Code as CodeIcon, Palette
+  Award as AwardIcon, Code as CodeIcon, Palette, Lock
 } from 'lucide-react';
 import api from '../utils/api.js';
 import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext.jsx';
 
 // ── 5 Template definitions (for UI display) ───────────────────────────────
 const TEMPLATES = [
@@ -36,10 +37,40 @@ const ScoreRing = ({ score }) => {
   );
 };
 
+const ALLOWED_TEMPLATES = {
+  free: ['classic'],
+  fresher: ['classic'],
+  experience: ['classic', 'modern', 'minimal'],
+  executive: ['classic', 'modern', 'minimal', 'executive', 'creative']
+};
+
 // ── Main component ────────────────────────────────────────────────────────
 const ResumeBuilder = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { user } = useAuth();
+
+  const userPlan = user?.plan || 'free';
+  const isTemplateAllowed = (templateId) => {
+    if (user?.role === 'admin') return true;
+    const allowed = ALLOWED_TEMPLATES[userPlan] || ['classic'];
+    return allowed.includes(templateId);
+  };
+
+  const handleTemplateSelect = (templateId) => {
+    if (!isTemplateAllowed(templateId)) {
+      toast.error(
+        <div>
+          <span className="font-semibold block">Template Locked</span>
+          <span>Please upgrade your plan to unlock this template.</span>
+        </div>,
+        { id: 'template-locked-toast' }
+      );
+      return;
+    }
+    setTemplate(templateId);
+  };
+
   const [loading, setLoading]       = useState(false);
   const [saving, setSaving]         = useState(false);
   const [analysis, setAnalysis]     = useState(null);
@@ -67,7 +98,9 @@ const ResumeBuilder = () => {
       const res = await api.get(`/resumes/${id}`);
       const data = res.data.data;
       setFormData(data);
-      if (data.template) setTemplate(data.template);
+      if (data.template) {
+        setTemplate(isTemplateAllowed(data.template) ? data.template : 'classic');
+      }
       if (data.atsScore) setAnalysis({ atsScore: data.atsScore });
     } catch { toast.error('Failed to load resume'); }
     finally { setLoading(false); }
@@ -263,38 +296,55 @@ const ResumeBuilder = () => {
               exit={{height:0,opacity:0}} className="overflow-hidden"
             >
               <div className="p-4 pt-0 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                {TEMPLATES.map(t => (
-                  <button
-                    key={t.id}
-                    onClick={() => setTemplate(t.id)}
-                    className={`relative p-3 rounded-xl border-2 text-left transition-all ${
-                      selectedTemplate === t.id
-                        ? 'border-violet-500 shadow-md'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {/* Mini template preview */}
-                    <div className="w-full h-20 rounded-lg mb-2 overflow-hidden"
-                      style={{background: t.bg}}>
-                      <div className="h-6 w-full flex items-center justify-center"
-                        style={{background: t.color}}>
-                        <div className="h-1.5 w-3/4 bg-white/40 rounded"/>
+                {TEMPLATES.map(t => {
+                  const allowed = isTemplateAllowed(t.id);
+                  const isSelected = selectedTemplate === t.id;
+                  
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => handleTemplateSelect(t.id)}
+                      className={`relative p-3 rounded-xl border-2 text-left transition-all ${
+                        !allowed
+                          ? 'border-gray-100 bg-gray-50/50 opacity-60 cursor-not-allowed'
+                          : isSelected
+                            ? 'border-violet-500 bg-white shadow-md'
+                            : 'border-gray-200 hover:border-gray-300 bg-white'
+                      }`}
+                    >
+                      {/* Mini template preview */}
+                      <div className={`w-full h-20 rounded-lg mb-2 overflow-hidden ${!allowed ? 'filter grayscale opacity-75' : ''}`}
+                        style={{background: t.bg}}>
+                        <div className="h-6 w-full flex items-center justify-center"
+                          style={{background: t.color}}>
+                          <div className="h-1.5 w-3/4 bg-white/40 rounded"/>
+                        </div>
+                        <div className="p-1.5 space-y-1">
+                          {[70,90,55,80].map((w,i) => (
+                            <div key={i} className="h-1 rounded" style={{width:`${w}%`, background: t.color, opacity: 0.25 + i*0.1}}/>
+                          ))}
+                        </div>
                       </div>
-                      <div className="p-1.5 space-y-1">
-                        {[70,90,55,80].map((w,i) => (
-                          <div key={i} className="h-1 rounded" style={{width:`${w}%`, background: t.color, opacity: 0.25 + i*0.1}}/>
-                        ))}
+                      <div className="font-semibold text-gray-800 text-sm flex items-center gap-1.5">
+                        {t.name}
+                        {!allowed && <Lock className="w-3.5 h-3.5 text-gray-400 shrink-0" />}
                       </div>
-                    </div>
-                    <div className="font-semibold text-gray-800 text-sm">{t.name}</div>
-                    <div className="text-xs text-gray-500 leading-snug mt-0.5">{t.desc}</div>
-                    {selectedTemplate === t.id && (
-                      <div className="absolute top-2 right-2 w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center">
-                        <CheckCircle className="w-3 h-3 text-white"/>
-                      </div>
-                    )}
-                  </button>
-                ))}
+                      <div className="text-xs text-gray-500 leading-snug mt-0.5">{t.desc}</div>
+                      
+                      {!allowed && (
+                        <div className="absolute top-2 right-2 bg-gray-200/80 backdrop-blur-sm text-[8px] font-bold text-gray-700 px-1.5 py-0.5 rounded uppercase">
+                          {t.id === 'modern' || t.id === 'minimal' ? 'Experience' : 'Executive'}
+                        </div>
+                      )}
+                      
+                      {allowed && isSelected && (
+                        <div className="absolute top-2 right-2 w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center">
+                          <CheckCircle className="w-3 h-3 text-white"/>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </motion.div>
           )}

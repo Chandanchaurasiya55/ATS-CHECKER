@@ -12,6 +12,9 @@ import AdminLogin from './pages/AdminLogin.jsx';
 import AdminRegister from './pages/AdminRegister.jsx';
 import AdminPanel from './pages/AdminPanel.jsx';
 import Pricing from './pages/Pricing.jsx';
+import Recruitment from './pages/Recruitment.jsx';
+import HigherEducation from './pages/HigherEducation.jsx';
+import CareerCoaches from './pages/CareerCoaches.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 
 const ProtectedRoute = ({ children }) => {
@@ -47,6 +50,9 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/pricing" element={<Pricing />} />
+                <Route path="/recruitment" element={<Recruitment />} />
+                <Route path="/higher-education" element={<HigherEducation />} />
+                <Route path="/career-coaches" element={<CareerCoaches />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/admin/register" element={<AdminRegister />} />
                 <Route 

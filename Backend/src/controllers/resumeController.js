@@ -4,8 +4,29 @@ import { analyzeATS } from '../utils/atsAnalyzer.js';
 import { generateHTMLResume } from '../utils/resumeTemplate.js';
 import PDFDocument from 'pdfkit';
 
+const ALLOWED_TEMPLATES = {
+  free: ['classic'],
+  fresher: ['classic'],
+  experience: ['classic', 'modern', 'minimal'],
+  executive: ['classic', 'modern', 'minimal', 'executive', 'creative']
+};
+
+const isTemplateAllowed = (plan, role, template) => {
+  if (role === 'admin') return true;
+  const allowed = ALLOWED_TEMPLATES[plan || 'free'] || ['classic'];
+  return allowed.includes(template || 'classic');
+};
+
 export const createResume = async (req, res) => {
   try {
+    const template = req.body.template || 'classic';
+    if (!isTemplateAllowed(req.user.plan, req.user.role, template)) {
+      return res.status(403).json({
+        success: false,
+        message: `Template '${template}' is not available on the ${req.user.plan || 'free'} plan. Please upgrade.`
+      });
+    }
+
     const analysis = analyzeATS(req.body);
     const resume = await Resume.create({
       ...req.body,
@@ -44,6 +65,14 @@ export const updateResume = async (req, res) => {
     if (!resume || resume.user.toString() !== req.user.id)
       return res.status(404).json({ success: false, message: 'Resume not found' });
 
+    const template = req.body.template || 'classic';
+    if (!isTemplateAllowed(req.user.plan, req.user.role, template)) {
+      return res.status(403).json({
+        success: false,
+        message: `Template '${template}' is not available on the ${req.user.plan || 'free'} plan. Please upgrade.`
+      });
+    }
+
     const analysis = analyzeATS(req.body);
     resume = await Resume.findByIdAndUpdate(
       req.params.id,
@@ -76,6 +105,13 @@ export const previewResume = async (req, res) => {
 
     // Template from query param or saved value
     const template = req.query.template || resume.template || 'classic';
+    if (!isTemplateAllowed(req.user.plan, req.user.role, template)) {
+      return res.status(403).json({
+        success: false,
+        message: `Template '${template}' is not available on the ${req.user.plan || 'free'} plan. Please upgrade.`
+      });
+    }
+
     const html = generateHTMLResume(resume, template);
     res.send(html);
   } catch (error) {
