@@ -1,16 +1,97 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileText, Loader2 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../utils/api.js';
 import toast from 'react-hot-toast';
 import ScoreDisplay from './ScoreDisplay.jsx';
 import Suggestions from './Suggestions.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const ATSChecker = () => {
   const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const PENDING_RESUME_KEY = 'pendingResumeToAnalyze';
+
+  const fileToDataUrl = (selectedFile) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(selectedFile);
+  });
+
+  const dataUrlToFile = (dataUrl, name, type) => {
+    const [header, base64] = dataUrl.split(',');
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i += 1) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return new File([bytes], name, { type: type || header.match(/:(.*?);/)[1] });
+  };
+
+  const savePendingResume = async (selectedFile) => {
+    const dataUrl = await fileToDataUrl(selectedFile);
+    sessionStorage.setItem(
+      PENDING_RESUME_KEY,
+      JSON.stringify({ name: selectedFile.name, type: selectedFile.type, dataUrl })
+    );
+  };
+
+  const loadPendingResume = () => {
+    const raw = sessionStorage.getItem(PENDING_RESUME_KEY);
+    if (!raw) return null;
+    try {
+      const parsed = JSON.parse(raw);
+      return dataUrlToFile(parsed.dataUrl, parsed.name, parsed.type);
+    } catch {
+      return null;
+    }
+  };
+
+  const clearPendingResume = () => {
+    sessionStorage.removeItem(PENDING_RESUME_KEY);
+  };
+
+  const uploadResume = async (selectedFile) => {
+    const uploadFile = selectedFile || file;
+    if (!uploadFile) {
+      toast.error('Please select a file first');
+      return;
+    }
+
+    setLoading(true);
+    const formData = new FormData();
+    formData.append('resume', uploadFile);
+
+    try {
+      const res = await api.post('/analysis/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      setResult(res.data.data);
+      toast.success('Analysis complete!');
+      clearPendingResume();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Analysis failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated && !result && !loading) {
+      const pendingFile = loadPendingResume();
+      if (pendingFile) {
+        setFile(pendingFile);
+        uploadResume(pendingFile);
+      }
+    }
+  }, [isAuthenticated]);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -51,21 +132,15 @@ const ATSChecker = () => {
       return;
     }
 
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('resume', file);
-
-    try {
-      const res = await api.post('/analysis/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      setResult(res.data.data);
-      toast.success('Analysis complete!');
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Analysis failed');
-    } finally {
-      setLoading(false);
+    if (!isAuthenticated) {
+      await savePendingResume(file);
+      const redirectPath = `${location.pathname}${location.search}#checker`;
+      navigate(`/login?redirect=${encodeURIComponent(redirectPath)}`);
+      toast('Login required to continue resume analysis');
+      return;
     }
+
+    await uploadResume(file);
   };
 
   return (

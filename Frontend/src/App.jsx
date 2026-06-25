@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx';
@@ -19,18 +19,20 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
   
   if (loading) return null;
-  if (!user) return <Navigate to="/login" />;
+  if (!user) return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} />;
   
   return children;
 };
 
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
   
   if (loading) return null;
-  if (!user?.isAdmin) return <Navigate to="/admin/login" />;
+  if (!user?.isAdmin) return <Navigate to={`/admin/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} />;
   
   return children;
 };

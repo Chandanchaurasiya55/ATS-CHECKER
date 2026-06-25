@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, Loader2, FileText, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -12,6 +12,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/dashboard';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +22,7 @@ const Login = () => {
       const res = await api.post('/auth/login', formData);
       login(res.data.token, res.data.user);
       toast.success('Welcome back!');
-      navigate('/dashboard');
+      navigate(redirect);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed');
     } finally {
