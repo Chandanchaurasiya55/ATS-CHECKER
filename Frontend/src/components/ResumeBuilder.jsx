@@ -48,9 +48,9 @@ const ALLOWED_TEMPLATES = {
 const ResumeBuilder = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, isSubscriptionExpired, openExpiredModal } = useAuth();
 
-  const userPlan = user?.plan || 'free';
+  const userPlan = isSubscriptionExpired ? 'free' : (user?.plan || 'free');
   const isTemplateAllowed = (templateId) => {
     if (user?.role === 'admin') return true;
     const allowed = ALLOWED_TEMPLATES[userPlan] || ['classic'];
@@ -59,6 +59,10 @@ const ResumeBuilder = () => {
 
   const handleTemplateSelect = (templateId) => {
     if (!isTemplateAllowed(templateId)) {
+      if (isSubscriptionExpired) {
+        openExpiredModal();
+        return;
+      }
       toast.error(
         <div>
           <span className="font-semibold block">Template Locked</span>

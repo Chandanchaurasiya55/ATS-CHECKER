@@ -1,6 +1,30 @@
 import User from '../models/User.js';
 import { generateToken } from '../middleware/auth.js';
 
+// Helper to check and handle plan expiration
+export const checkPlanExpiry = async (user) => {
+  if (!user) return { isExpired: false };
+
+  // If user has a plan expiration date set and it has passed
+  if (user.planExpiresAt && new Date() > new Date(user.planExpiresAt)) {
+    let modified = false;
+    if (user.plan !== 'free') {
+      user.plan = 'free';
+      modified = true;
+    }
+    if (!user.isExpired) {
+      user.isExpired = true;
+      modified = true;
+    }
+    if (modified) {
+      await user.save();
+    }
+    return { isExpired: true };
+  }
+
+  return { isExpired: false };
+};
+
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -10,7 +34,21 @@ export const register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
-    const user = await User.create({ name, email, password });
+    // 1 Year Free Premium (Executive Tier) for College Access
+    const oneYearFromNow = new Date();
+    oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      plan: 'executive',
+      planStartDate: new Date(),
+      planExpiresAt: oneYearFromNow,
+      isCollegeTrial: true,
+      isExpired: false,
+    });
+
     const token = generateToken(user._id);
 
     res.status(201).json({
@@ -22,9 +60,11 @@ export const register = async (req, res) => {
         email: user.email,
         role: user.role,
         isAdmin: user.role === 'admin',
-        plan: user.plan || 'free',
-        planStartDate: user.planStartDate || null,
-        planExpiresAt: user.planExpiresAt || null,
+        plan: user.plan,
+        planStartDate: user.planStartDate,
+        planExpiresAt: user.planExpiresAt,
+        isCollegeTrial: user.isCollegeTrial,
+        isExpired: false,
       },
     });
   } catch (error) {
@@ -46,6 +86,8 @@ export const login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
+    const { isExpired } = await checkPlanExpiry(user);
+
     const token = generateToken(user._id);
 
     res.json({
@@ -60,6 +102,8 @@ export const login = async (req, res) => {
         plan: user.plan || 'free',
         planStartDate: user.planStartDate || null,
         planExpiresAt: user.planExpiresAt || null,
+        isCollegeTrial: Boolean(user.isCollegeTrial),
+        isExpired: Boolean(isExpired || user.isExpired),
       },
     });
   } catch (error) {
@@ -70,6 +114,12 @@ export const login = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const { isExpired } = await checkPlanExpiry(user);
+
     res.json({
       success: true,
       user: {
@@ -81,6 +131,8 @@ export const getMe = async (req, res) => {
         plan: user.plan || 'free',
         planStartDate: user.planStartDate || null,
         planExpiresAt: user.planExpiresAt || null,
+        isCollegeTrial: Boolean(user.isCollegeTrial),
+        isExpired: Boolean(isExpired || user.isExpired),
       },
     });
   } catch (error) {

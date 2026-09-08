@@ -40,6 +40,14 @@ const userSchema = new mongoose.Schema(
     planExpiresAt: {
       type: Date,
     },
+    isCollegeTrial: {
+      type: Boolean,
+      default: false,
+    },
+    isExpired: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

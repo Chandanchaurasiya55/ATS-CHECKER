@@ -157,6 +157,8 @@ export const verifyPayment = async (req, res) => {
     user.plan = payment.plan;
     user.planStartDate = new Date();
     user.planExpiresAt = expiryDate;
+    user.isExpired = false;
+    user.isCollegeTrial = false;
     await user.save();
 
     res.json({
@@ -171,6 +173,8 @@ export const verifyPayment = async (req, res) => {
         plan: user.plan,
         planStartDate: user.planStartDate,
         planExpiresAt: user.planExpiresAt,
+        isCollegeTrial: false,
+        isExpired: false,
       }
     });
   } catch (error) {

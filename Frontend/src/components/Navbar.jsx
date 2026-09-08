@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, isSubscriptionExpired, daysRemaining } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileOrgOpen, setMobileOrgOpen] = useState(false);
@@ -119,6 +119,30 @@ const Navbar = () => {
                 </Link>
                 <div className="h-6 w-px bg-gray-200"></div>
 
+                {/* Plan status indicator */}
+                {isSubscriptionExpired ? (
+                  <Link
+                    to="/pricing"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-all shadow-sm"
+                    title="Your subscription has expired. Click to renew."
+                  >
+                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                    Plan Expired · Renew
+                  </Link>
+                ) : user?.isCollegeTrial ? (
+                  <span
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary-50 text-primary-700 border border-primary-100 shadow-sm"
+                    title={`Valid until ${user?.planExpiresAt ? new Date(user.planExpiresAt).toLocaleDateString() : ''}`}
+                  >
+                    <span>🎓 College Pass</span>
+                    {daysRemaining !== null && (
+                      <span className="text-[10px] bg-primary-200/60 px-1.5 py-0.5 rounded-md">
+                        {daysRemaining}d
+                      </span>
+                    )}
+                  </span>
+                ) : null}
+
                 <div className="relative group">
                   <div className="flex items-center gap-2 pr-2 cursor-default">
                     <div className="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-semibold border-2 border-white shadow-sm">
@@ -128,6 +152,26 @@ const Navbar = () => {
                   </div>
 
                   <div className="absolute right-0 top-full mt-3 w-56 rounded-2xl bg-white border border-gray-100 shadow-xl p-2 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50">
+                    <div className="px-3 py-2 border-b border-gray-100 mb-1">
+                      <p className="text-[11px] text-gray-400 font-medium">Subscription</p>
+                      <div className="flex items-center justify-between mt-0.5">
+                        <span className="text-xs font-bold capitalize text-gray-800">
+                          {isSubscriptionExpired ? 'Expired' : `${user?.plan || 'Free'} Plan`}
+                        </span>
+                        {isSubscriptionExpired ? (
+                          <Link to="/pricing" className="text-[11px] text-rose-600 font-bold hover:underline">
+                            Renew
+                          </Link>
+                        ) : (
+                          user?.planExpiresAt && (
+                            <span className="text-[10px] text-gray-400">
+                              {daysRemaining}d left
+                            </span>
+                          )
+                        )}
+                      </div>
+                    </div>
+
                     {user?.isAdmin && (
                       <Link
                         to="/admin"
@@ -286,6 +330,26 @@ const Navbar = () => {
                     Resume Builder
                   </Link>
                   <hr className="border-gray-50" />
+                  {isSubscriptionExpired ? (
+                    <Link
+                      to="/pricing"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-between p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 font-bold text-sm"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                        Subscription Expired
+                      </span>
+                      <span className="text-xs underline bg-white px-2.5 py-1 rounded-lg shadow-xs">Renew Now</span>
+                    </Link>
+                  ) : user?.isCollegeTrial ? (
+                    <div className="flex items-center justify-between p-3.5 rounded-2xl bg-primary-50 border border-primary-100 text-primary-700 font-bold text-sm">
+                      <span>🎓 1-Year College Plan</span>
+                      <span className="text-xs font-semibold text-primary-600 bg-white px-2 py-0.5 rounded-md">
+                        {daysRemaining}d left
+                      </span>
+                    </div>
+                  ) : null}
                   <div className="flex items-center gap-3 py-2">
                     <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600">
                       <User className="w-5 h-5" />

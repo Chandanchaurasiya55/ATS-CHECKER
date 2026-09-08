@@ -59,7 +59,7 @@ const loadRazorpayScript = () => {
 };
 
 const Pricing = () => {
-  const { isAuthenticated, user, refreshUser } = useAuth();
+  const { isAuthenticated, user, refreshUser, isSubscriptionExpired } = useAuth();
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -162,6 +162,26 @@ const Pricing = () => {
       <div className="absolute top-[800px] -right-20 w-[500px] h-[500px] bg-blue-100/20 rounded-full blur-3xl -z-10"></div>
       <div className="absolute bottom-40 -left-40 w-[600px] h-[600px] bg-primary-100/20 rounded-full blur-3xl -z-10"></div>
 
+      {/* Expired Plan Alert Banner */}
+      {isSubscriptionExpired && (
+        <div className="max-w-4xl mx-auto mb-12 p-6 rounded-3xl bg-gradient-to-r from-rose-500 via-red-600 to-amber-600 text-white shadow-xl shadow-rose-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0 shadow-inner">
+              <AlertCircle className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <p className="font-black text-lg sm:text-xl">Your subscription has been expired</p>
+              <p className="text-white/90 text-xs sm:text-sm mt-1 leading-relaxed">
+                Aapka 1-saal ka college free access expire ho chuka hai. All templates aur AI features bina kisi interruption use karne ke liye neeche se apna plan choose karein.
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-bold uppercase tracking-wider bg-white text-rose-700 px-4 py-2 rounded-xl shadow-sm shrink-0">
+            Select A Plan
+          </span>
+        </div>
+      )}
+
       {/* Top Header */}
       <div className="text-center mb-8 max-w-4xl mx-auto">
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold text-gray-900 tracking-tight leading-[1.15] mb-8">
@@ -240,7 +260,7 @@ const Pricing = () => {
             if (!pricing) return null;
 
             const isHighlighted = plan.id === 'experience';
-            const isUserCurrentPlan = user?.plan === plan.id;
+            const isUserCurrentPlan = !isSubscriptionExpired && user?.plan === plan.id;
             
             let btnText = "Buy Plan";
             let isDisabled = false;
@@ -248,6 +268,9 @@ const Pricing = () => {
             if (isUserCurrentPlan) {
               btnText = "Active Plan";
               isDisabled = true;
+            } else if (isSubscriptionExpired) {
+              btnText = "Renew Plan";
+              isDisabled = false;
             } else if (isAuthenticated) {
               if (plan.id === 'fresher' && (user?.plan === 'experience' || user?.plan === 'executive')) {
                 btnText = "Downgrade Contact Support";

@@ -16,6 +16,13 @@ export const protect = async (req, res, next) => {
       if (!req.user) {
         return res.status(401).json({ success: false, message: 'Not authorized, user not found' });
       }
+
+      // Check if plan has expired
+      if (req.user.plan !== 'free' && req.user.planExpiresAt && new Date() > new Date(req.user.planExpiresAt)) {
+        req.user.plan = 'free';
+        req.user.isExpired = true;
+        await User.findByIdAndUpdate(req.user._id, { plan: 'free', isExpired: true });
+      }
       
       return next();
     } catch (error) {
