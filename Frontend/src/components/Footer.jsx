@@ -26,10 +26,10 @@ const Footer = () => {
             <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Product</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/builder" className="hover:text-white transition-colors">Resume Builder</Link>
+                <Link to="/resume-builder" className="hover:text-white transition-colors">Resume Builder</Link>
               </li>
               <li>
-                <Link to="/" className="hover:text-white transition-colors">ATS Analyzer</Link>
+                <Link to="/ats-checker" className="hover:text-white transition-colors">ATS Analyzer & Checker</Link>
               </li>
               <li>
                 <Link to="/pricing" className="hover:text-white transition-colors">Pricing Plans</Link>

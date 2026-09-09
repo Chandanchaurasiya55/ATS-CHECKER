@@ -17,6 +17,19 @@ const isTemplateAllowed = (plan, role, template) => {
   return allowed.includes(template || 'classic');
 };
 
+const normalizeResumeData = (body) => {
+  const data = { ...body };
+  if (data.projects && Array.isArray(data.projects)) {
+    data.projects = data.projects.map((p) => ({
+      ...p,
+      technologies: typeof p.technologies === 'string'
+        ? p.technologies.split(',').map((t) => t.trim()).filter(Boolean)
+        : (Array.isArray(p.technologies) ? p.technologies : [])
+    }));
+  }
+  return data;
+};
+
 export const createResume = async (req, res) => {
   try {
     const template = req.body.template || 'classic';
@@ -27,9 +40,10 @@ export const createResume = async (req, res) => {
       });
     }
 
-    const analysis = analyzeATS(req.body);
+    const normalizedBody = normalizeResumeData(req.body);
+    const analysis = analyzeATS(normalizedBody);
     const resume = await Resume.create({
-      ...req.body,
+      ...normalizedBody,
       user: req.user.id,
       atsScore: analysis.atsScore,
     });
@@ -73,10 +87,11 @@ export const updateResume = async (req, res) => {
       });
     }
 
-    const analysis = analyzeATS(req.body);
+    const normalizedBody = normalizeResumeData(req.body);
+    const analysis = analyzeATS(normalizedBody);
     resume = await Resume.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, atsScore: analysis.atsScore },
+      { ...normalizedBody, atsScore: analysis.atsScore },
       { new: true, runValidators: true }
     );
     res.json({ success: true, data: { resume, analysis } });

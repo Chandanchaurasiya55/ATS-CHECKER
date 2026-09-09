@@ -84,7 +84,7 @@ const Home = () => {
               
               <div className="flex flex-row items-center gap-2.5 sm:gap-4 pt-2">
                 <Link
-                  to={isAuthenticated ? "/builder" : "/register"}
+                  to={isAuthenticated ? "/resume-builder" : "/register"}
                   className="inline-flex items-center justify-center bg-primary-600 text-white font-semibold px-4 py-3 sm:px-6 sm:py-3.5 rounded-xl hover:bg-primary-700 hover:scale-105 transition-all shadow-lg shadow-primary-200 text-xs sm:text-sm md:text-base whitespace-nowrap"
                 >
                   Build Your Resume
@@ -228,7 +228,7 @@ const Home = () => {
                 </p>
                 <div>
                   <Link
-                    to={isAuthenticated ? "/builder" : "/register"}
+                    to={isAuthenticated ? "/resume-builder" : "/register"}
                     className="inline-flex items-center justify-center bg-primary-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-primary-700 hover:scale-105 transition-all text-sm sm:text-base shadow-lg shadow-primary-500/20"
                   >
                     Build a Tailored Resume

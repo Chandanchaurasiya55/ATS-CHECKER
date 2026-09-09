@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Minus, Save, Eye, Download, ChevronDown, ChevronUp,
@@ -21,21 +21,6 @@ const TEMPLATES = [
   { id: 'creative',  name: 'Creative',  desc: 'Vibrant, design & marketing roles',    color: '#dc2626', bg: '#fee2e2' },
 ];
 
-// ── Score ring component ──────────────────────────────────────────────────
-const ScoreRing = ({ score }) => {
-  const r = 36, c = 2 * Math.PI * r;
-  const filled = (score / 100) * c;
-  const color = score >= 80 ? '#16a34a' : score >= 60 ? '#d97706' : '#dc2626';
-  return (
-    <svg width="90" height="90" viewBox="0 0 90 90">
-      <circle cx="45" cy="45" r={r} fill="none" stroke="#e5e7eb" strokeWidth="8"/>
-      <circle cx="45" cy="45" r={r} fill="none" stroke={color} strokeWidth="8"
-        strokeDasharray={`${filled} ${c}`} strokeLinecap="round"
-        transform="rotate(-90 45 45)" style={{transition:'stroke-dasharray 0.8s ease'}}/>
-      <text x="45" y="49" textAnchor="middle" fontSize="16" fontWeight="700" fill={color}>{score}</text>
-    </svg>
-  );
-};
 
 const ALLOWED_TEMPLATES = {
   free: ['classic'],
@@ -47,7 +32,13 @@ const ALLOWED_TEMPLATES = {
 // ── Main component ────────────────────────────────────────────────────────
 const ResumeBuilder = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const location = useLocation();
+  const { id: paramId } = useParams();
+  const [searchParams] = useSearchParams();
+  const [activeResumeId, setActiveResumeId] = useState(
+    paramId || searchParams.get('id') || location.state?.resumeId || null
+  );
+  const id = activeResumeId;
   const { user, isSubscriptionExpired, openExpiredModal } = useAuth();
 
   const userPlan = isSubscriptionExpired ? 'free' : (user?.plan || 'free');
@@ -77,7 +68,6 @@ const ResumeBuilder = () => {
 
   const [loading, setLoading]       = useState(false);
   const [saving, setSaving]         = useState(false);
-  const [analysis, setAnalysis]     = useState(null);
   const [activeSection, setSection] = useState('personal');
   const [selectedTemplate, setTemplate] = useState('classic');
   const [showTemplates, setShowTemplates] = useState(true);
@@ -101,11 +91,16 @@ const ResumeBuilder = () => {
       setLoading(true);
       const res = await api.get(`/resumes/${id}`);
       const data = res.data.data;
+      if (data.projects) {
+        data.projects = data.projects.map(p => ({
+          ...p,
+          technologies: Array.isArray(p.technologies) ? p.technologies.join(', ') : (p.technologies || '')
+        }));
+      }
       setFormData(data);
       if (data.template) {
         setTemplate(isTemplateAllowed(data.template) ? data.template : 'classic');
       }
-      if (data.atsScore) setAnalysis({ atsScore: data.atsScore });
     } catch { toast.error('Failed to load resume'); }
     finally { setLoading(false); }
   };
@@ -162,7 +157,7 @@ const ResumeBuilder = () => {
 
   const addProject = () => setFormData(prev => ({
     ...prev, projects: [...prev.projects,
-      { name:'', description:'', technologies:[], link:'' }]
+      { name:'', description:'', technologies:'', link:'' }]
   }));
 
   const updateProject = (i, f, v) => {
@@ -176,15 +171,24 @@ const ResumeBuilder = () => {
     }
     setSaving(true);
     try {
-      const payload = { ...formData, template: selectedTemplate };
+      const payload = {
+        ...formData,
+        template: selectedTemplate,
+        projects: (formData.projects || []).map(p => ({
+          ...p,
+          technologies: typeof p.technologies === 'string'
+            ? p.technologies.split(',').map(t => t.trim()).filter(Boolean)
+            : (Array.isArray(p.technologies) ? p.technologies : [])
+        }))
+      };
       const res = id
         ? await api.put(`/resumes/${id}`, payload)
         : await api.post('/resumes', payload);
-      const a = res.data.data.analysis;
-      setAnalysis(a);
-      toast.success(`Saved! ATS Score: ${a.atsScore}`);
-      if (!id && res.data.data.resume?._id)
-        navigate(`/builder/${res.data.data.resume._id}`);
+      toast.success('Resume saved successfully!');
+      const savedId = res.data.data.resume?._id;
+      if (!activeResumeId && savedId) {
+        setActiveResumeId(savedId);
+      }
     } catch (e) { toast.error(e.response?.data?.message || 'Save failed'); }
     finally { setSaving(false); }
   };
@@ -241,35 +245,8 @@ const ResumeBuilder = () => {
           <h1 className="text-2xl font-bold text-gray-900">Resume Builder</h1>
           <p className="text-gray-500">Fill your details, pick a template, download your resume</p>
         </div>
-        {analysis && (
-          <motion.div initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}}
-            className="flex items-center gap-4 px-5 py-3 rounded-xl bg-white border-2 border-gray-200 shadow-sm">
-            <ScoreRing score={analysis.atsScore}/>
-            <div>
-              <div className="text-sm font-semibold text-gray-700">ATS Score</div>
-              <div className="text-xs text-gray-500">{analysis.domainLabel || 'Detected domain'}</div>
-            </div>
-          </motion.div>
-        )}
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-wrap gap-3">
-        <button onClick={saveResume} disabled={saving} className="btn-primary flex items-center gap-2 disabled:opacity-50">
-          {saving ? <Loader2 className="w-4 h-4 animate-spin"/> : <Save className="w-4 h-4"/>}
-          {saving ? 'Saving...' : id ? 'Update Resume' : 'Save & Analyze'}
-        </button>
-        {id && (
-          <>
-            <button onClick={previewResume} className="btn-secondary flex items-center gap-2">
-              <Eye className="w-4 h-4"/> Preview
-            </button>
-            <button onClick={downloadResume} className="btn-secondary flex items-center gap-2">
-              <Download className="w-4 h-4"/> Download PDF
-            </button>
-          </>
-        )}
-      </div>
 
       {/* ── Template Selector ── */}
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -566,8 +543,8 @@ const ResumeBuilder = () => {
                       value={proj.description} onChange={e=>updateProject(i,'description',e.target.value)}/>
                     <input className="input-field mt-4"
                       placeholder="Technologies used (comma separated): React, Node.js, MongoDB"
-                      value={proj.technologies?.join(', ')}
-                      onChange={e=>updateProject(i,'technologies',e.target.value.split(',').map(t=>t.trim()).filter(Boolean))}/>
+                      value={typeof proj.technologies === 'string' ? proj.technologies : (proj.technologies?.join(', ') || '')}
+                      onChange={e => updateProject(i, 'technologies', e.target.value)}/>
                   </div>
                 ))}
                 <button onClick={addProject} className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-primary-400 hover:text-primary-600 transition-colors flex items-center justify-center gap-2">
@@ -579,64 +556,50 @@ const ResumeBuilder = () => {
         </AnimatePresence>
       </div>
 
-      {/* ── Analysis Results ── */}
-      {analysis && (
-        <motion.div initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} className="card">
-          <div className="flex items-start gap-4">
-            <ScoreRing score={analysis.atsScore}/>
-            <div className="flex-1">
-              <h3 className="font-bold text-gray-900 text-lg mb-1">ATS Analysis Complete</h3>
-              {analysis.domainLabel && (
-                <p className="text-sm text-gray-500 mb-3">Detected domain: <strong className="text-primary-600">{analysis.domainLabel}</strong></p>
-              )}
+      {/* ── Bottom Action Bar (Moved to the bottom per user request) ── */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          <h3 className="font-bold text-gray-900 text-sm sm:text-base">
+            {id ? 'Resume Saved & Ready' : 'Done filling in your details?'}
+          </h3>
+          <p className="text-xs text-gray-500 mt-0.5">
+            {id
+              ? 'Click Update Resume anytime you make edits, or preview and download the PDF.'
+              : 'Click Save Resume to generate your ATS-compliant resume.'}
+          </p>
+        </div>
 
-              {/* Score breakdown */}
-              {analysis.sectionScores && (
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                  {[
-                    {label:'Keywords', val: analysis.sectionScores.keywords},
-                    {label:'Sections', val: analysis.sectionScores.sections},
-                    {label:'Format',   val: analysis.sectionScores.format},
-                  ].map(({label,val}) => (
-                    <div key={label} className="text-center p-2 bg-gray-50 rounded-lg">
-                      <div className={`text-lg font-bold ${val>=70?'text-green-600':val>=50?'text-yellow-600':'text-red-500'}`}>{val}</div>
-                      <div className="text-xs text-gray-500">{label}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
+          {id && (
+            <>
+              <button
+                type="button"
+                onClick={previewResume}
+                className="btn-secondary flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-bold w-full sm:w-auto"
+              >
+                <Eye className="w-4 h-4 text-gray-600" /> Preview
+              </button>
+              <button
+                type="button"
+                onClick={downloadResume}
+                className="btn-secondary flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-bold w-full sm:w-auto"
+              >
+                <Download className="w-4 h-4 text-gray-600" /> Download PDF
+              </button>
+            </>
+          )}
 
-              {/* Issues */}
-              {analysis.issues?.length > 0 && (
-                <div className="mb-3">
-                  <p className="text-sm font-semibold text-red-700 mb-1 flex items-center gap-1"><AlertCircle className="w-4 h-4"/> Issues to fix:</p>
-                  <ul className="space-y-1">
-                    {analysis.issues.map((issue,i) => (
-                      <li key={i} className="text-sm text-red-600 flex items-start gap-1.5">
-                        <span className="mt-0.5">•</span>{issue}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Suggestions */}
-              {analysis.suggestions?.length > 0 && (
-                <div>
-                  <p className="text-sm font-semibold text-blue-700 mb-1 flex items-center gap-1"><Info className="w-4 h-4"/> Suggestions:</p>
-                  <ul className="space-y-1">
-                    {analysis.suggestions.map((s,i) => (
-                      <li key={i} className="text-sm text-blue-600 flex items-start gap-1.5">
-                        <span className="mt-0.5">•</span>{s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        </motion.div>
-      )}
+          <button
+            type="button"
+            onClick={saveResume}
+            disabled={saving}
+            className="btn-primary flex items-center justify-center gap-2 px-6 sm:px-8 py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-primary-600/20 disabled:opacity-50 w-full sm:w-auto hover:scale-[1.02] active:scale-[0.98] transition-all"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {saving ? 'Saving...' : id ? 'Update Resume' : 'Save Resume'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

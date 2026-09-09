@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Crown, Loader2, AlertCircle, GraduationCap, Sparkles, Building2, Calendar, ArrowRight } from 'lucide-react';
+import { Check, Crown, Loader2, AlertCircle, GraduationCap, Sparkles, Building2, Calendar, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../utils/api.js';
 import toast from 'react-hot-toast';
@@ -172,7 +172,7 @@ const Pricing = () => {
             <div>
               <p className="font-black text-lg sm:text-xl">Your subscription has been expired</p>
               <p className="text-white/90 text-xs sm:text-sm mt-1 leading-relaxed">
-                Aapka 1-saal ka college free access expire ho chuka hai. All templates aur AI features bina kisi interruption use karne ke liye neeche se apna plan choose karein.
+                Your 1-year complimentary college access has expired. Choose a plan below to continue creating resumes and accessing all premium templates and AI features without interruption.
               </p>
             </div>
           </div>
@@ -182,118 +182,90 @@ const Pricing = () => {
         </div>
       )}
 
-      {/* 1-Year College Active Plan Showcase */}
-      {user?.isCollegeTrial && !isSubscriptionExpired && (
-        <div className="max-w-4xl mx-auto mb-12 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-primary-900 via-primary-800 to-blue-950 text-white shadow-2xl shadow-primary-900/30 border border-primary-700/50 relative overflow-hidden">
-          <div className="absolute top-0 right-0 -mr-10 -mt-10 w-48 h-48 bg-primary-500/20 rounded-full blur-3xl pointer-events-none"></div>
-
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-            <div className="space-y-3">
-              <div className="inline-flex items-center gap-2 bg-primary-500/20 text-primary-200 border border-primary-400/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                <GraduationCap className="w-4 h-4 text-primary-300" />
-                <span>Active 1-Year College Subscription</span>
-              </div>
-
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                {user.collegeName || 'Partner College'} Pass
-              </h2>
-
-              <p className="text-primary-100 text-sm max-w-xl leading-relaxed">
-                Aapko aapke college email prefix se <strong>1 Saal (365 Din)</strong> ke liye Executive tier premium access free activate kiya gaya hai.
-              </p>
-
-              <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-primary-200 pt-1">
-                <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-xl">
-                  <Calendar className="w-4 h-4 text-primary-300" />
-                  Valid till: {user.planExpiresAt ? new Date(user.planExpiresAt).toLocaleDateString() : '1 Year'}
-                </span>
-                <span className="flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl">
-                  <Sparkles className="w-4 h-4" />
-                  {daysRemaining !== null ? `${daysRemaining} Days Remaining` : 'Active'}
-                </span>
-                <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-xl">
-                  100% Free · Sponsored Access
-                </span>
-              </div>
-            </div>
-
-            <div className="shrink-0 flex flex-col items-start md:items-end gap-3">
-              <span className="inline-flex items-center gap-2 bg-emerald-500 text-white font-black text-xs uppercase px-4 py-2 rounded-xl shadow-lg shadow-emerald-500/30">
-                <Check className="w-4 h-4 stroke-[3]" /> Active Plan
-              </span>
-              <Link
-                to="/builder"
-                className="inline-flex items-center gap-2 text-white bg-white/10 hover:bg-white/20 border border-white/20 px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-105"
-              >
-                Go to Builder <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* For Non-College Users / Partner Info */}
-      {!user?.isCollegeTrial && (
-        <div className="max-w-4xl mx-auto mb-10 p-4 sm:p-5 rounded-2xl bg-blue-50/80 border border-blue-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-blue-900">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-primary-100 flex items-center justify-center text-primary-600 shrink-0">
-              <GraduationCap className="w-5 h-5" />
-            </div>
-            <span>
-              <strong>Are you a College Student?</strong> Agar aapke college ne ATSPro ke sath tie-up kiya hai, to apne college email domain/prefix se register karein aur 1-Year free Executive access payein.
-            </span>
-          </div>
-          {!isAuthenticated && (
-            <Link to="/register" className="font-bold text-primary-600 hover:text-primary-700 underline shrink-0 whitespace-nowrap">
-              Register with College Email →
-            </Link>
-          )}
-        </div>
-      )}
-
       {/* Top Header */}
-      <div className="text-center mb-8 max-w-4xl mx-auto">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold text-gray-900 tracking-tight leading-[1.15] mb-8">
+      <div className="text-center max-w-3xl mx-auto mb-8 pt-2 sm:pt-4">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-gray-900 tracking-tight leading-[1.2] mb-3">
           Build a strikingly powerful<br />resume approved by recruiters
         </h1>
-        <Link
-          to={isAuthenticated ? "/builder" : "/register"}
-          className="inline-flex items-center justify-center bg-primary-600 text-white font-semibold px-8 py-4 rounded-xl hover:bg-primary-700 hover:scale-105 transition-all shadow-lg shadow-primary-200"
-        >
-          Build My Resume Now
-        </Link>
+        <p className="text-gray-500 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+          {user?.isCollegeTrial && !isSubscriptionExpired
+            ? "Your college partnership grants you full complimentary access to all templates and features."
+            : "Choose the plan that fits your career journey. Cancel or change plans anytime."}
+        </p>
       </div>
 
-      {/* Billing Cycle Toggle */}
-      <div className="flex justify-center items-center mb-16">
-        <div className="bg-gray-100/80 backdrop-blur-md p-1.5 rounded-2xl flex items-center gap-1 border border-gray-200">
-          <button
-            onClick={() => setBillingCycle('monthly')}
-            className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
-              billingCycle === 'monthly'
-                ? 'bg-white text-gray-900 shadow-md shadow-gray-200/50'
-                : 'text-gray-500 hover:text-gray-900'
-            }`}
+      {/* 1-Year College Active Plan Showcase */}
+      {user?.isCollegeTrial && !isSubscriptionExpired && (
+        <div className="max-w-4xl mx-auto mb-10 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/40 to-blue-50/80 border border-blue-100 flex flex-col sm:flex-row items-center justify-between gap-5 text-xs sm:text-sm shadow-sm">
+          <div className="flex items-start sm:items-center gap-4 text-left">
+            <div className="w-11 h-11 rounded-xl bg-primary-600 flex items-center justify-center text-white shrink-0 shadow-sm">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-primary-700 bg-primary-100/70 px-2.5 py-0.5 rounded-md">
+                  Active Subscription
+                </span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded-md">
+                  Executive Plan Unlocked
+                </span>
+              </div>
+              <h2 className="text-base sm:text-lg font-bold text-gray-900 tracking-tight mt-1.5">
+                {user.collegeName || 'Partner College'} Pass
+              </h2>
+              <p className="text-gray-600 text-xs sm:text-sm mt-0.5 leading-relaxed">
+                Your complimentary 1-Year Executive tier access is active through your college partnership.
+              </p>
+              <div className="flex flex-wrap items-center gap-2.5 text-xs text-gray-500 mt-2">
+                <span className="flex items-center gap-1 font-medium text-gray-600">
+                  <Calendar className="w-3.5 h-3.5 text-primary-600" />
+                  Valid till: {user.planExpiresAt ? new Date(user.planExpiresAt).toLocaleDateString() : '1 Year'}
+                </span>
+                {daysRemaining !== null && (
+                  <span className="text-primary-700 font-semibold bg-primary-50 px-2 py-0.5 rounded-md">
+                    {daysRemaining} days remaining
+                  </span>
+                )}
+                <span className="text-emerald-700 font-medium bg-emerald-50 px-2 py-0.5 rounded-md">
+                  100% Free Sponsored Access
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <Link
+            to="/resume-builder"
+            className="inline-flex items-center gap-1.5 font-semibold text-white bg-primary-600 hover:bg-primary-700 px-5 py-2.5 rounded-xl shadow-sm hover:shadow transition-all shrink-0 whitespace-nowrap text-xs sm:text-sm"
           >
-            Monthly Billing
-          </button>
-          <button
-            onClick={() => setBillingCycle('quarterly')}
-            className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-1.5 ${
-              billingCycle === 'quarterly'
-                ? 'bg-primary-600 text-white shadow-md shadow-primary-200/50'
-                : 'text-gray-500 hover:text-gray-900'
-            }`}
-          >
-            3-Months Billing
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider ${
-              billingCycle === 'quarterly' ? 'bg-white text-primary-700' : 'bg-primary-100 text-primary-700'
-            }`}>
-              Save 25%
-            </span>
-          </button>
+            Go to Resume Builder <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
-      </div>
+      )}
+
+      {/* Campus Partner Info Banner */}
+      {!user?.isCollegeTrial && (
+        <div className="max-w-4xl mx-auto mb-12 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-50/90 via-indigo-50/40 to-blue-50/80 border border-blue-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm shadow-sm">
+          <div className="flex items-start sm:items-center gap-3.5 text-left">
+            <div className="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center text-white shrink-0 shadow-sm">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
+                Bring ATSPro to Your Campus
+              </h3>
+              <p className="text-gray-600 text-xs sm:text-sm mt-0.5 leading-relaxed">
+                Partner with us and give your students 1 year of free premium access to AI-powered resume building, professional templates, and career tools.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/higher-education"
+            className="inline-flex items-center gap-1.5 font-semibold text-white bg-primary-600 hover:bg-primary-700 px-5 py-2.5 rounded-xl shadow-sm hover:shadow transition-all shrink-0 whitespace-nowrap text-xs sm:text-sm"
+          >
+            Become a Campus Partner →
+          </Link>
+        </div>
+      )}
 
       {/* Pricing Cards Grid */}
       {loading ? (
@@ -379,12 +351,6 @@ const Pricing = () => {
                         {plan.name}
                       </span>
                     )}
-
-                    {pricing.savings && (
-                      <span className="bg-primary-100 text-primary-800 text-[10px] font-normal px-2 py-1 rounded-lg">
-                        {pricing.totalValue ? `₹${pricing.totalValue} - ` : ''}{pricing.savings}
-                      </span>
-                    )}
                   </div>
 
                   <div className="flex items-baseline gap-1 mt-3">
@@ -465,7 +431,7 @@ const Pricing = () => {
             Create a visually stunning resume with ease. Our resume builder will guide you through the process. We help with content suggestions and choosing the right design and layout, while you focus on presenting yourself.
           </p>
           <Link
-            to={isAuthenticated ? "/builder" : "/register"}
+            to={isAuthenticated ? "/resume-builder" : "/register"}
             className="inline-flex items-center justify-center border-2 border-gray-900 bg-white text-gray-900 font-semibold px-8 py-4 rounded-xl hover:bg-gray-900 hover:text-white hover:scale-105 transition-all duration-200"
           >
             Build My Resume Now
@@ -509,7 +475,7 @@ const Pricing = () => {
             Choose from hundreds of professionally designed and ATS-friendly resume templates, tens of resume sections, and thousands of combinations made to make you stand out.
           </p>
           <Link
-            to={isAuthenticated ? "/builder" : "/register"}
+            to={isAuthenticated ? "/resume-builder" : "/register"}
             className="inline-flex items-center justify-center border-2 border-gray-900 bg-white text-gray-900 font-semibold px-8 py-4 rounded-xl hover:bg-gray-900 hover:text-white hover:scale-105 transition-all duration-200"
           >
             View All Templates

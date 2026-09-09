@@ -108,63 +108,45 @@ const Navbar = () => {
               </div>
             </div>
 
+            <Link to="/ats-checker" className="text-gray-600 hover:text-primary-600 font-semibold transition-all">
+              ATS Checker
+            </Link>
+
             <Link to="/pricing" className="text-gray-600 hover:text-primary-600 font-semibold transition-all">
               Pricing
             </Link>
 
             {isAuthenticated ? (
               <>
-                <Link to="/builder" className="text-gray-600 hover:text-primary-600 font-semibold transition-all">
+                <Link to="/resume-builder" className="text-gray-600 hover:text-primary-600 font-semibold transition-all">
                   Resume Builder
                 </Link>
-                <div className="h-6 w-px bg-gray-200"></div>
-
-                {/* Plan status indicator */}
-                {isSubscriptionExpired ? (
-                  <Link
-                    to="/pricing"
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 transition-all shadow-sm"
-                    title="Your subscription has expired. Click to renew."
-                  >
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                    Plan Expired · Renew
-                  </Link>
-                ) : user?.isCollegeTrial ? (
-                  <span
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary-50 text-primary-700 border border-primary-100 shadow-sm"
-                    title={`Valid until ${user?.planExpiresAt ? new Date(user.planExpiresAt).toLocaleDateString() : ''}`}
-                  >
-                    <span>🎓 College Pass</span>
-                    {daysRemaining !== null && (
-                      <span className="text-[10px] bg-primary-200/60 px-1.5 py-0.5 rounded-md">
-                        {daysRemaining}d
-                      </span>
-                    )}
-                  </span>
-                ) : null}
-
                 <div className="relative group">
-                  <div className="flex items-center gap-2 pr-2 cursor-default">
+                  <div className="flex items-center gap-2 cursor-pointer py-1.5 px-2 rounded-full hover:bg-gray-50 transition-colors">
                     <div className="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-semibold border-2 border-white shadow-sm">
                       {user?.name?.charAt(0).toUpperCase()}
                     </div>
                     <span className="text-sm font-semibold text-gray-700">{user?.name}</span>
                   </div>
 
-                  <div className="absolute right-0 top-full mt-3 w-56 rounded-2xl bg-white border border-gray-100 shadow-xl p-2 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50">
+                  <div className="absolute right-0 top-full mt-2 w-56 rounded-2xl bg-white border border-gray-100 shadow-xl p-2 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50">
                     <div className="px-3 py-2 border-b border-gray-100 mb-1">
                       <p className="text-[11px] text-gray-400 font-medium">Subscription</p>
                       <div className="flex items-center justify-between mt-0.5">
-                        <span className="text-xs font-bold capitalize text-gray-800">
-                          {isSubscriptionExpired ? 'Expired' : `${user?.plan || 'Free'} Plan`}
+                        <span className="text-xs font-bold text-gray-800">
+                          {isSubscriptionExpired 
+                            ? 'Expired' 
+                            : user?.isCollegeTrial 
+                              ? '🎓 College Pass' 
+                              : `${user?.plan ? user.plan.charAt(0).toUpperCase() + user.plan.slice(1) : 'Free'} Plan`}
                         </span>
                         {isSubscriptionExpired ? (
                           <Link to="/pricing" className="text-[11px] text-rose-600 font-bold hover:underline">
                             Renew
                           </Link>
                         ) : (
-                          user?.planExpiresAt && (
-                            <span className="text-[10px] text-gray-400">
+                          daysRemaining !== null && (
+                            <span className="text-[10px] font-semibold text-primary-700 bg-primary-50 px-1.5 py-0.5 rounded">
                               {daysRemaining}d left
                             </span>
                           )
@@ -172,20 +154,21 @@ const Navbar = () => {
                       </div>
                     </div>
 
-                    {user?.isAdmin && (
+                    {user?.isAdmin ? (
                       <Link
                         to="/admin"
                         className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-semibold transition-colors"
                       >
-                        <LayoutDashboard className="w-4 h-4" /> Admin Panel
+                        <LayoutDashboard className="w-4 h-4 text-primary-600" /> Admin Panel
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/dashboard"
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-semibold transition-colors"
+                      >
+                        <LayoutDashboard className="w-4 h-4 text-primary-600" /> Dashboard
                       </Link>
                     )}
-                    <Link
-                      to="/dashboard"
-                      className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-gray-700 hover:bg-primary-50 hover:text-primary-700 font-semibold transition-colors"
-                    >
-                      <LayoutDashboard className="w-4 h-4" /> Dashboard
-                    </Link>
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-red-600 hover:bg-red-50 font-semibold transition-colors"
@@ -306,7 +289,7 @@ const Navbar = () => {
                   >
                     Pricing
                   </Link>
-                  {user?.isAdmin && (
+                  {user?.isAdmin ? (
                     <Link 
                       to="/admin" 
                       className="block text-xl font-semibold text-gray-900" 
@@ -314,23 +297,31 @@ const Navbar = () => {
                     >
                       Admin Panel
                     </Link>
+                  ) : (
+                    <Link 
+                      to="/dashboard" 
+                      className="block text-xl font-semibold text-gray-900" 
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
                   )}
                   <Link 
-                    to="/dashboard" 
+                    to="/ats-checker" 
                     className="block text-xl font-semibold text-gray-900" 
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Dashboard
+                    ATS Checker
                   </Link>
                   <Link 
-                    to="/builder" 
+                    to="/resume-builder" 
                     className="block text-xl font-semibold text-gray-900" 
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Resume Builder
                   </Link>
                   <hr className="border-gray-50" />
-                  {isSubscriptionExpired ? (
+                  {isSubscriptionExpired && (
                     <Link
                       to="/pricing"
                       onClick={() => setMobileMenuOpen(false)}
@@ -342,19 +333,19 @@ const Navbar = () => {
                       </span>
                       <span className="text-xs underline bg-white px-2.5 py-1 rounded-lg shadow-xs">Renew Now</span>
                     </Link>
-                  ) : user?.isCollegeTrial ? (
-                    <div className="flex items-center justify-between p-3.5 rounded-2xl bg-primary-50 border border-primary-100 text-primary-700 font-bold text-sm">
-                      <span>🎓 1-Year College Plan</span>
-                      <span className="text-xs font-semibold text-primary-600 bg-white px-2 py-0.5 rounded-md">
-                        {daysRemaining}d left
-                      </span>
+                  )}
+                  <div className="flex items-center justify-between py-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 font-bold">
+                        {user?.name?.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <span className="font-bold text-gray-900 block">{user?.name}</span>
+                        <span className="text-xs text-gray-500">
+                          {user?.isCollegeTrial ? `🎓 College Pass (${daysRemaining}d left)` : `${user?.plan || 'Free'} Plan`}
+                        </span>
+                      </div>
                     </div>
-                  ) : null}
-                  <div className="flex items-center gap-3 py-2">
-                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-600">
-                      <User className="w-5 h-5" />
-                    </div>
-                    <span className="font-bold text-gray-900">{user?.name}</span>
                   </div>
                   <button 
                     onClick={handleLogout} 

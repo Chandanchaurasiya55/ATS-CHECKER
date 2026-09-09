@@ -16,6 +16,7 @@ import Pricing from './pages/Pricing.jsx';
 import Recruitment from './pages/Recruitment.jsx';
 import HigherEducation from './pages/HigherEducation.jsx';
 import CareerCoaches from './pages/CareerCoaches.jsx';
+import ATSCheckerPage from './pages/ATSCheckerPage.jsx';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 
 const ProtectedRoute = ({ children }) => {
@@ -59,11 +60,11 @@ const AppContent = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/about" element={<About />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/ats-checker" element={<ATSCheckerPage />} />
             <Route path="/recruitment" element={<Recruitment />} />
             <Route path="/higher-education" element={<HigherEducation />} />
             <Route path="/career-coaches" element={<CareerCoaches />} />
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/login404" element={<AdminLogin />} />
             <Route path="/admin/register" element={<AdminRegister />} />
             <Route 
               path="/admin" 
@@ -82,13 +83,22 @@ const AppContent = () => {
               } 
             />
             <Route 
-              path="/builder" 
+              path="/resume-builder" 
               element={
                 <ProtectedRoute>
                   <Builder />
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/resume-builder/:id" 
+              element={
+                <ProtectedRoute>
+                  <Builder />
+                </ProtectedRoute>
+              } 
+            />
+            <Route path="/builder" element={<Navigate to="/resume-builder" replace />} />
             <Route 
               path="/builder/:id" 
               element={

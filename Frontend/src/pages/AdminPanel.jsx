@@ -400,14 +400,14 @@ const AdminPanel = () => {
         }`}
       >
         {/* Brand Logo Header */}
-        <div className="flex items-center justify-between px-6 py-5.5 border-b border-slate-800/80">
+        <div className="flex items-center justify-between px-6 pt-6 pb-5 border-b border-slate-800/80">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#3C50E0] flex items-center justify-center text-white shadow-lg shadow-[#3C50E0]/30 font-black text-lg">
+            <div className="w-9 h-9 rounded-xl bg-[#3C50E0] flex items-center justify-center text-white shadow-lg shadow-[#3C50E0]/30 font-black text-lg shrink-0">
               <FileText className="w-5 h-5 text-white" />
             </div>
             <div className="leading-tight">
               <span className="text-base font-black text-white tracking-tight block">ATS Resume Checker</span>
-              <span className="text-[10px] block font-bold text-[#80CAEE] uppercase tracking-wider">Admin Dashboard</span>
+              <span className="text-[10px] block font-bold text-[#80CAEE] uppercase tracking-wider mt-0.5">Admin Dashboard</span>
             </div>
           </Link>
 
@@ -1594,7 +1594,7 @@ const AdminPanel = () => {
                     </span>
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                    Yahan jo bhi email prefix ya domain aap set karenge, us email se register karne wale har student ko automatically 1 saal ka free Executive subscription aur saare templates unlocked milenge.
+                    Every student registering with a matching college email domain configured here automatically receives 1 year of free Executive access with all templates unlocked.
                   </p>
                 </div>
 

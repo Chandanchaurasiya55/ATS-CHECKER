@@ -52,8 +52,8 @@ const SubscriptionExpiredModal = ({ isOpen, onClose }) => {
 
             {/* Subtext */}
             <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-6">
-              Aapka <span className="font-semibold text-gray-800">1-saal ka free college premium access</span> complete ho chuka hai. 
-              Pro templates aur advanced ATS features continue rakhne ke liye kripya naya subscription plan chunein.
+              Your <span className="font-semibold text-gray-800">1-year complimentary college premium access</span> has expired. 
+              Please choose a subscription plan to continue using Pro templates and advanced ATS optimization features.
             </p>
 
             {/* Feature list preview */}

@@ -61,7 +61,7 @@ const Dashboard = () => {
             <div>
               <h2 className="text-xl font-black text-gray-900">Your subscription has been expired</h2>
               <p className="text-gray-600 text-sm mt-1 leading-relaxed">
-                Aapka 1-saal ka free college premium access complete ho chuka hai. Premium templates aur AI tools continue rakhne ke liye kripya apna subscription renew karein.
+                Your 1-year complimentary college access has expired. Please renew your subscription to continue using all premium templates and AI tools without interruption.
               </p>
             </div>
           </div>
@@ -95,7 +95,7 @@ const Dashboard = () => {
             </div>
           </div>
           <Link
-            to="/builder"
+            to="/resume-builder"
             className="text-primary-600 hover:text-primary-700 text-xs sm:text-sm font-bold flex items-center gap-1 shrink-0"
           >
             Open Builder <ArrowRight className="w-3.5 h-3.5" />
@@ -116,7 +116,7 @@ const Dashboard = () => {
           animate={{ opacity: 1, x: 0 }}
         >
           <Link 
-            to="/builder" 
+            to="/resume-builder" 
             className="group inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-primary-500 transition-all hover:scale-105 shadow-lg shadow-primary-600/20"
           >
             <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" /> 
@@ -139,7 +139,7 @@ const Dashboard = () => {
             Your dashboard is empty. Start building your high-scoring ATS resume today!
           </p>
           <Link 
-            to="/builder" 
+            to="/resume-builder" 
             className="inline-flex items-center gap-2 bg-gray-900 text-white px-8 py-4 rounded-2xl font-bold hover:bg-black transition-all"
           >
             Create Your First Resume <ArrowRight className="w-5 h-5" />
@@ -185,7 +185,8 @@ const Dashboard = () => {
                 </div>
                 
                 <Link
-                  to={`/builder/${resume._id}`}
+                  to="/resume-builder"
+                  state={{ resumeId: resume._id }}
                   className="flex items-center gap-1 text-primary-600 font-bold hover:gap-2 transition-all"
                 >
                   Edit <ArrowRight className="w-4 h-4" />
