@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { GraduationCap, Award, BarChart3, Clock, ArrowRight, Building, Mail, User, ShieldAlert, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '../utils/api.js';
 
 const HigherEducation = () => {
   const [formData, setFormData] = useState({
@@ -12,14 +13,25 @@ const HigherEducation = () => {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      await api.post('/contact', {
+        name: formData.name,
+        email: formData.email,
+        companyOrInstitution: formData.institution,
+        size: formData.studentCount,
+        message: formData.message,
+        type: 'higher-education',
+      });
       toast.success('Thank you! A Higher Education partnership advisor will reach out to schedule your demo.');
       setFormData({ name: '', email: '', institution: '', studentCount: 'under-1000', message: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to submit request.');
+    } finally {
       setSubmitting(false);
-    }, 1000);
+    }
   };
 
   const collegeFeatures = [

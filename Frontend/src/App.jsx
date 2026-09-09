@@ -40,17 +40,19 @@ const AdminRoute = ({ children }) => {
 
 const AppContent = () => {
   const { showExpiredModal, dismissExpiredModal } = useAuth();
+  const location = useLocation();
+  const isAdminDashboard = location.pathname === '/admin';
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans flex flex-col">
-      <div className="flex-grow">
+    <div className={`min-h-screen ${isAdminDashboard ? 'bg-[#F1F5F9]' : 'bg-gray-50'} text-gray-900 font-sans flex flex-col`}>
+      <div className="flex-grow flex flex-col">
         <Toaster position="top-center" reverseOrder={false} />
         <SubscriptionExpiredModal 
           isOpen={showExpiredModal} 
           onClose={dismissExpiredModal} 
         />
-        <Navbar />
-        <main className="container mx-auto">
+        {!isAdminDashboard && <Navbar />}
+        <main className={isAdminDashboard ? 'w-full flex-grow flex flex-col' : 'container mx-auto flex-grow'}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -60,6 +62,7 @@ const AppContent = () => {
             <Route path="/recruitment" element={<Recruitment />} />
             <Route path="/higher-education" element={<HigherEducation />} />
             <Route path="/career-coaches" element={<CareerCoaches />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/login404" element={<AdminLogin />} />
             <Route path="/admin/register" element={<AdminRegister />} />
             <Route 

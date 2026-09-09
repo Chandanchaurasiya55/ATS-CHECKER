@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Users, FileText, CheckCircle, Award, ArrowRight, Mail, User, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '../utils/api.js';
 
 const CareerCoaches = () => {
   const [formData, setFormData] = useState({
@@ -12,14 +13,25 @@ const CareerCoaches = () => {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      await api.post('/contact', {
+        name: formData.name,
+        email: formData.email,
+        companyOrInstitution: formData.website,
+        size: formData.clientCount,
+        message: formData.message,
+        type: 'career-coaches',
+      });
       toast.success('Thank you! A coach relationship manager will connect with you shortly.');
       setFormData({ name: '', email: '', website: '', clientCount: '1-10', message: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to submit form.');
+    } finally {
       setSubmitting(false);
-    }, 1000);
+    }
   };
 
   const coachFeatures = [

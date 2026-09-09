@@ -8,6 +8,7 @@ import adminRoutes from './routes/adminRoutes.js';
 import resumeRoutes from './routes/resumeRoutes.js';
 import analysisRoutes from './routes/analysisRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import contactRoutes from './routes/contactRoutes.js';
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/analysis', analysisRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Error Handler
 app.use(errorHandler);

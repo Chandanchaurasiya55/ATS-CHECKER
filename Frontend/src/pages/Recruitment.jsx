@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Shield, Sparkles, Zap, Users, Check, ArrowRight, Building, Mail, Phone, User, MessageSquare } from 'lucide-react';
 import toast from 'react-hot-toast';
+import api from '../utils/api.js';
 
 const Recruitment = () => {
   const [formData, setFormData] = useState({
@@ -12,14 +13,25 @@ const Recruitment = () => {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      await api.post('/contact', {
+        name: formData.name,
+        email: formData.email,
+        companyOrInstitution: formData.company,
+        size: formData.teamSize,
+        message: formData.message,
+        type: 'recruitment',
+      });
       toast.success('Thank you for your interest! A sales representative will contact you within 24 hours.');
       setFormData({ name: '', email: '', company: '', teamSize: '1-10', message: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to submit form. Please try again.');
+    } finally {
       setSubmitting(false);
-    }, 1000);
+    }
   };
 
   const benefits = [
