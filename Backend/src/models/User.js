@@ -48,6 +48,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    collegeName: {
+      type: String,
+      default: '',
+    },
   },
   { timestamps: true }
 );

@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import Resume from '../models/Resume.js';
+import CollegePrefix from '../models/CollegePrefix.js';
 import { generateToken } from '../middleware/auth.js';
 
 export const registerAdmin = async (req, res) => {
@@ -100,6 +101,82 @@ export const getAdminResumes = async (req, res) => {
   try {
     const resumes = await Resume.find().populate('user', 'name email');
     res.json({ success: true, data: resumes });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// College Email Prefix Management
+export const getCollegePrefixes = async (req, res) => {
+  try {
+    const prefixes = await CollegePrefix.find().sort('-createdAt');
+    res.json({ success: true, data: prefixes });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const addCollegePrefix = async (req, res) => {
+  try {
+    let { prefix, collegeName, durationDays = 365 } = req.body;
+
+    if (!prefix || !prefix.trim()) {
+      return res.status(400).json({ success: false, message: 'Email prefix or domain is required' });
+    }
+
+    prefix = prefix.trim().toLowerCase();
+
+    const exists = await CollegePrefix.findOne({ prefix });
+    if (exists) {
+      return res.status(400).json({ success: false, message: `Prefix '${prefix}' is already configured` });
+    }
+
+    const newPrefix = await CollegePrefix.create({
+      prefix,
+      collegeName: (collegeName && collegeName.trim()) || 'Partner College',
+      durationDays: Number(durationDays) || 365,
+      isActive: true,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: `Prefix '${prefix}' added successfully with ${newPrefix.durationDays} days free access`,
+      data: newPrefix,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const deleteCollegePrefix = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await CollegePrefix.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: 'Prefix not found' });
+    }
+    res.json({ success: true, message: 'Prefix deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const toggleCollegePrefix = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const item = await CollegePrefix.findById(id);
+    if (!item) {
+      return res.status(404).json({ success: false, message: 'Prefix not found' });
+    }
+
+    item.isActive = !item.isActive;
+    await item.save();
+
+    res.json({
+      success: true,
+      message: `Prefix '${item.prefix}' is now ${item.isActive ? 'Active' : 'Disabled'}`,
+      data: item,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

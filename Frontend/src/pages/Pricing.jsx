@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Crown, Loader2, AlertCircle } from 'lucide-react';
+import { Check, Crown, Loader2, AlertCircle, GraduationCap, Sparkles, Building2, Calendar, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../utils/api.js';
 import toast from 'react-hot-toast';
@@ -59,7 +59,7 @@ const loadRazorpayScript = () => {
 };
 
 const Pricing = () => {
-  const { isAuthenticated, user, refreshUser, isSubscriptionExpired } = useAuth();
+  const { isAuthenticated, user, refreshUser, isSubscriptionExpired, daysRemaining } = useAuth();
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -179,6 +179,75 @@ const Pricing = () => {
           <span className="text-xs font-bold uppercase tracking-wider bg-white text-rose-700 px-4 py-2 rounded-xl shadow-sm shrink-0">
             Select A Plan
           </span>
+        </div>
+      )}
+
+      {/* 1-Year College Active Plan Showcase */}
+      {user?.isCollegeTrial && !isSubscriptionExpired && (
+        <div className="max-w-4xl mx-auto mb-12 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-primary-900 via-primary-800 to-blue-950 text-white shadow-2xl shadow-primary-900/30 border border-primary-700/50 relative overflow-hidden">
+          <div className="absolute top-0 right-0 -mr-10 -mt-10 w-48 h-48 bg-primary-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-2 bg-primary-500/20 text-primary-200 border border-primary-400/30 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                <GraduationCap className="w-4 h-4 text-primary-300" />
+                <span>Active 1-Year College Subscription</span>
+              </div>
+
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                {user.collegeName || 'Partner College'} Pass
+              </h2>
+
+              <p className="text-primary-100 text-sm max-w-xl leading-relaxed">
+                Aapko aapke college email prefix se <strong>1 Saal (365 Din)</strong> ke liye Executive tier premium access free activate kiya gaya hai.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-primary-200 pt-1">
+                <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-xl">
+                  <Calendar className="w-4 h-4 text-primary-300" />
+                  Valid till: {user.planExpiresAt ? new Date(user.planExpiresAt).toLocaleDateString() : '1 Year'}
+                </span>
+                <span className="flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl">
+                  <Sparkles className="w-4 h-4" />
+                  {daysRemaining !== null ? `${daysRemaining} Days Remaining` : 'Active'}
+                </span>
+                <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1.5 rounded-xl">
+                  100% Free · Sponsored Access
+                </span>
+              </div>
+            </div>
+
+            <div className="shrink-0 flex flex-col items-start md:items-end gap-3">
+              <span className="inline-flex items-center gap-2 bg-emerald-500 text-white font-black text-xs uppercase px-4 py-2 rounded-xl shadow-lg shadow-emerald-500/30">
+                <Check className="w-4 h-4 stroke-[3]" /> Active Plan
+              </span>
+              <Link
+                to="/builder"
+                className="inline-flex items-center gap-2 text-white bg-white/10 hover:bg-white/20 border border-white/20 px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-105"
+              >
+                Go to Builder <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* For Non-College Users / Partner Info */}
+      {!user?.isCollegeTrial && (
+        <div className="max-w-4xl mx-auto mb-10 p-4 sm:p-5 rounded-2xl bg-blue-50/80 border border-blue-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-blue-900">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-primary-100 flex items-center justify-center text-primary-600 shrink-0">
+              <GraduationCap className="w-5 h-5" />
+            </div>
+            <span>
+              <strong>Are you a College Student?</strong> Agar aapke college ne ATSPro ke sath tie-up kiya hai, to apne college email domain/prefix se register karein aur 1-Year free Executive access payein.
+            </span>
+          </div>
+          {!isAuthenticated && (
+            <Link to="/register" className="font-bold text-primary-600 hover:text-primary-700 underline shrink-0 whitespace-nowrap">
+              Register with College Email →
+            </Link>
+          )}
         </div>
       )}
 

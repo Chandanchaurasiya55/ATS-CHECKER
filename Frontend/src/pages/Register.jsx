@@ -21,7 +21,11 @@ const Register = () => {
     try {
       const res = await api.post('/auth/register', formData);
       login(res.data.token, res.data.user);
-      toast.success('Account created successfully!');
+      if (res.data.user?.isCollegeTrial) {
+        toast.success(`🎉 1-Year Free Executive Subscription activated via ${res.data.user.collegeName || 'College Partner'}! All templates unlocked!`, { duration: 6000 });
+      } else {
+        toast.success('Account created successfully!');
+      }
       navigate(redirect);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Registration failed');
