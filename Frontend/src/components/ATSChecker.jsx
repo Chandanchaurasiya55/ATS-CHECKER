@@ -4,8 +4,8 @@ import { Upload, FileText, Loader2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../utils/api.js';
 import toast from 'react-hot-toast';
-import ScoreDisplay from './ScoreDisplay.jsx';
-import Suggestions from './Suggestions.jsx';
+import ScoreDisplay, { ScoreCard, IssuesCard } from './ScoreDisplay.jsx';
+import Suggestions, { KeywordsCard, SuggestionsCard } from './Suggestions.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const ATSChecker = () => {
@@ -13,10 +13,16 @@ const ATSChecker = () => {
   const [dragActive, setDragActive] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, isSubscriptionExpired } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const PENDING_RESUME_KEY = 'pendingResumeToAnalyze';
+
+  const isPremium = Boolean(
+    user &&
+    !isSubscriptionExpired &&
+    (user.isAdmin || user.isCollegeTrial || user.plan === 'experience' || user.plan === 'executive')
+  );
 
   const fileToDataUrl = (selectedFile) => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -113,13 +119,25 @@ const ATSChecker = () => {
   };
 
   const handleFile = (selectedFile) => {
-    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
-    if (!allowedTypes.includes(selectedFile.type)) {
-      toast.error('Only PDF, DOC, DOCX, and TXT files are allowed');
+    const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt', '.png', '.jpg', '.jpeg'];
+    const fileName = selectedFile.name?.toLowerCase() || '';
+    const hasValidExt = allowedExtensions.some(ext => fileName.endsWith(ext));
+    const isAllowedMime = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain',
+      'image/png',
+      'image/jpeg',
+      'image/jpg',
+    ].includes(selectedFile.type);
+
+    if (!hasValidExt && !isAllowedMime) {
+      toast.error('Please upload your resume in PDF, DOC, DOCX, PNG, or JPG format');
       return;
     }
-    if (selectedFile.size > 5 * 1024 * 1024) {
-      toast.error('File size must be less than 5MB');
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      toast.error('File size must be less than 10MB');
       return;
     }
     setFile(selectedFile);
@@ -161,7 +179,7 @@ const ATSChecker = () => {
           type="file"
           id="resume-upload"
           className="hidden"
-          accept=".pdf,.doc,.docx,.txt"
+          accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg,image/png,image/jpeg"
           onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
         />
         
@@ -175,7 +193,7 @@ const ATSChecker = () => {
                 {file ? file.name : 'Drop your resume here or click to browse'}
               </p>
               <p className="text-xs text-gray-400 mt-1 font-normal">
-                Supports PDF, DOC, DOCX, TXT (Max 5MB)
+                Supports PDF, DOC, DOCX, PNG, JPG (Max 10MB)
               </p>
             </div>
           </div>
@@ -245,18 +263,32 @@ const ATSChecker = () => {
               </button>
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-6">
-              <ScoreDisplay
-                score={result.atsScore}
-                sectionScores={result.sectionScores}
-                issues={result.issues}
-              />
-              <Suggestions
-                suggestions={result.suggestions}
-                keywordsFound={result.keywordsFound}
-                keywordsMissing={result.keywordsMissing}
-                improvedText={result.improvedText}
-              />
+            <div className="w-full space-y-8">
+              {/* Row 1: Score & Keywords Audit (Matched 100% Equal Height) */}
+              <div className="grid lg:grid-cols-2 gap-8 items-stretch">
+                <ScoreCard
+                  score={result.atsScore}
+                  sectionScores={result.sectionScores}
+                />
+                <KeywordsCard
+                  keywordsFound={result.keywordsFound}
+                  keywordsMissing={result.keywordsMissing}
+                  improvedText={result.improvedText}
+                  isPremium={isPremium}
+                />
+              </div>
+
+              {/* Row 2: Critical Issues & Improvement Suggestions (Matched 100% Equal Height) */}
+              <div className="grid lg:grid-cols-2 gap-8 items-stretch">
+                <IssuesCard
+                  issues={result.issues}
+                  isPremium={isPremium}
+                />
+                <SuggestionsCard
+                  suggestions={result.suggestions}
+                  isPremium={isPremium}
+                />
+              </div>
             </div>
           </motion.div>
         )}

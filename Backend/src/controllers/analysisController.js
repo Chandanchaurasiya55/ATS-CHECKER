@@ -1,7 +1,7 @@
 import Analysis from '../models/Analysis.js';
 import { analyzeText } from '../utils/atsAnalyzer.js';
 import fs from 'fs';
-import pdfParse from 'pdf-parse/lib/pdf-parse.js';
+import { extractResumeText } from '../utils/resumeExtractor.js';
 
 export const uploadAndAnalyze = async (req, res) => {
   try {
@@ -9,21 +9,8 @@ export const uploadAndAnalyze = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please upload a file' });
     }
 
-    let text = "";
-    
-    // Extract text based on file type
-    if (req.file.mimetype === 'application/pdf') {
-      const dataBuffer = fs.readFileSync(req.file.path);
-      const data = await pdfParse(dataBuffer);
-      text = data.text;
-    } else {
-      // For txt or others, read as utf8
-      text = fs.readFileSync(req.file.path, 'utf8');
-    }
-
-    if (!text || text.trim().length < 50) {
-      throw new Error("Could not extract enough text from the resume. Please ensure the file is not empty or corrupted.");
-    }
+    // Extract text reliably across PDF, DOCX, DOC, TXT, PNG, JPG, JPEG
+    const text = await extractResumeText(req.file);
 
     const analysisResult = analyzeText(text);
 

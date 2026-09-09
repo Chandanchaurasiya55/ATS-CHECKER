@@ -216,19 +216,54 @@ function scoreFormat(data) {
   let score = 100;
   const issues = [], suggestions = [];
   const p = data.personalInfo || {};
-  if (!p.email)     { issues.push('Email address missing.');       score -= 15; }
-  if (!p.phone)     { issues.push('Phone number missing.');        score -= 10; }
+  if (!p.email) {
+    issues.push({
+      title: 'Email Address Missing',
+      description: 'Applicant Tracking Systems automatically index candidate contact info. Resumes without a valid email cannot be processed.',
+      fix: 'Add a valid professional email in the Personal Info section.'
+    });
+    score -= 15;
+  }
+  if (!p.phone) {
+    issues.push({
+      title: 'Phone Number Missing',
+      description: 'Hiring teams require a direct contact phone number for initial screenings and recruiter calls.',
+      fix: 'Add a valid phone number with country code in Personal Info.'
+    });
+    score -= 10;
+  }
   if (!p.linkedin)  { suggestions.push('Add your LinkedIn URL.');  score -= 5;  }
   if (!p.portfolio) { suggestions.push('Add portfolio/GitHub.');   score -= 3;  }
   const summaryLen = (data.summary || '').trim().length;
-  if (summaryLen === 0)   { issues.push('No professional summary.');                         score -= 10; }
-  else if (summaryLen < 80) { suggestions.push('Expand summary to 150–300 characters.');    score -= 5;  }
+  if (summaryLen === 0) {
+    issues.push({
+      title: 'No Professional Summary',
+      description: 'A summary introduces your core skills and career trajectory at a glance to recruiter ATS screens.',
+      fix: 'Write a 2-3 sentence summary highlighting your top skills and accomplishments.'
+    });
+    score -= 10;
+  }
+  else if (summaryLen < 80) { suggestions.push('Expand summary to 150–300 characters.'); score -= 5; }
   const skillCount = data.skills?.length || 0;
-  if (skillCount < 3)      { issues.push('Add at least 5 skills.');              score -= 15; }
+  if (skillCount < 3) {
+    issues.push({
+      title: 'Add at Least 5 Skills',
+      description: 'ATS ranking algorithms rely heavily on matched technical and domain-specific keywords.',
+      fix: 'Add 5 to 10 relevant skills in the Skills section.'
+    });
+    score -= 15;
+  }
   else if (skillCount < 5) { suggestions.push('Add more skills — aim for 8–15.'); score -= 8;  }
   else if (skillCount < 8) { suggestions.push('8–15 skills is ideal.');           score -= 3;  }
   const expCount = data.experience?.length || 0;
-  if (expCount === 0) { issues.push('No experience. Add internships or projects.'); score -= 15; }
+  if (expCount === 0) {
+    issues.push({
+      title: 'No Work Experience Listed',
+      description: 'Work history is the most heavily weighted component in recruiter ATS ranking algorithms.',
+      fix: 'Add your past jobs, internships, or freelance projects under Experience.'
+    });
+    score -= 15;
+  }
   else {
     const allText = buildTextFromData(data).toLowerCase();
     const verbsFound = ACTION_VERBS.filter(v => allText.includes(v));
@@ -238,7 +273,14 @@ function scoreFormat(data) {
     const emptyDesc = data.experience.filter(e => !e.description?.trim() && !(e.achievements?.some(a => a.trim()))).length;
     if (emptyDesc > 0) { suggestions.push(`${emptyDesc} experience entr${emptyDesc > 1 ? 'ies' : 'y'} missing description.`); score -= emptyDesc * 5; }
   }
-  if (!data.education?.length) { issues.push('No education entries.'); score -= 10; }
+  if (!data.education?.length) {
+    issues.push({
+      title: 'No Education Entries',
+      description: 'Recruiters check for educational qualifications to verify minimum job criteria.',
+      fix: 'Add your degree, university, or college details in Education.'
+    });
+    score -= 10;
+  }
   if (!data.projects?.length)  { suggestions.push('Add projects to showcase your work.'); score -= 5; }
   return { formatScore: Math.max(score, 0), issues, suggestions };
 }
@@ -250,7 +292,11 @@ export const analyzeATS = (data) => {
   const fmt = scoreFormat(data);
   const atsScore = Math.round((kw.keywordScore * 0.40) + (sec.sectionScore * 0.30) + (fmt.formatScore * 0.30));
   const allIssues = [
-    ...sec.criticalMissing.map(s => `Critical: "${s}" section is missing.`),
+    ...sec.criticalMissing.map(s => ({
+      title: `Critical: "${s}" Section Missing`,
+      description: `The "${s}" section is an essential resume component required by automated recruitment screening tools.`,
+      fix: `Create an explicit section titled "${s}" with corresponding details.`
+    })),
     ...fmt.issues
   ];
   const allSuggestions = [
@@ -316,17 +362,89 @@ export const analyzeText = (resumeText) => {
   let formatScore = 100;
   const issues = [], suggestions = [];
   const wordCount = resumeText.split(/\s+/).filter(Boolean).length;
-  if (wordCount < 200)       { issues.push(`Too short (${wordCount} words).`); formatScore -= 25; }
-  else if (wordCount < 400)  { suggestions.push(`Expand to 400+ words.`);       formatScore -= 12; }
-  else if (wordCount > 1200) { suggestions.push(`Too long — keep concise.`);    formatScore -= 5;  }
-  if (!/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(resumeText)) { issues.push('No email found.');  formatScore -= 15; }
-  if (!/(\+?\d[\d\s\-(]{7,}\d)/.test(resumeText))                           { issues.push('No phone found.'); formatScore -= 10; }
-  if (!/linkedin/i.test(resumeText)) { suggestions.push('Add LinkedIn URL.');   formatScore -= 5; }
-  if (!/github/i.test(resumeText))   { suggestions.push('Add GitHub profile.'); formatScore -= 3; }
+
+  if (wordCount < 250) {
+    issues.push({
+      title: `Resume Content is Too Brief (${wordCount} words)`,
+      description: "ATS algorithms look for depth and keyword density. Resumes under 350-400 words are flagged as incomplete and rank lower in recruiter searches.",
+      fix: "Expand your work experience, projects, or education sections with 3-4 bullet points detailing your responsibilities, technologies, and achievements."
+    });
+    formatScore -= 25;
+  } else if (wordCount < 400) {
+    suggestions.push("Expand resume content to 400+ words for better keyword coverage and comprehensive ATS context.");
+    formatScore -= 10;
+  } else if (wordCount > 1200) {
+    suggestions.push("Resume exceeds 1,200 words — keep it concise (ideally 1 to 2 pages) to prevent parser truncation.");
+    formatScore -= 5;
+  }
+
+  if (!/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(resumeText)) {
+    issues.push({
+      title: "No Contact Email Detected",
+      description: "Applicant Tracking Systems automatically parse and index candidate contact info. Profiles missing a valid email cannot be contacted.",
+      fix: "Add a clearly formatted professional email address (e.g., name@gmail.com) in your resume header."
+    });
+    formatScore -= 15;
+  }
+
+  if (!/(\+?\d[\d\s\-(]{7,}\d)/.test(resumeText)) {
+    issues.push({
+      title: "No Phone Number Detected",
+      description: "Recruiters and hiring managers require a direct contact phone number for initial screenings.",
+      fix: "Add your phone number with country code (e.g., +91 98765 43210) in your contact header."
+    });
+    formatScore -= 10;
+  }
+
+  // Missing essential sections
+  if (sectionsMissing.includes('experience') && sectionsMissing.includes('projects')) {
+    issues.push({
+      title: "Missing Work Experience or Projects Section",
+      description: "Neither a 'Work Experience' nor a 'Projects' section heading was found. ATS algorithms heavily weight professional/project experience.",
+      fix: "Add an 'Experience' or 'Projects' section with role titles, company/project names, and bulleted achievements."
+    });
+    formatScore -= 15;
+  }
+
+  if (sectionsMissing.includes('skills')) {
+    issues.push({
+      title: "Missing Dedicated Skills Section",
+      description: "ATS keyword extractors specifically scan a dedicated 'Skills' or 'Technical Skills' section to match job descriptions.",
+      fix: "Create a dedicated 'Technical Skills' or 'Key Competencies' section listing your tools, frameworks, and languages."
+    });
+    formatScore -= 10;
+  }
+
+  if (sectionsMissing.includes('education')) {
+    issues.push({
+      title: "Missing Education Section",
+      description: "Many ATS filters require an explicit 'Education' section heading to verify degree requirements.",
+      fix: "Add an 'Education' section specifying your degree, institution, and graduation year."
+    });
+    formatScore -= 10;
+  }
+
+  if (!/linkedin/i.test(resumeText)) {
+    suggestions.push("Add your LinkedIn profile URL (e.g. linkedin.com/in/yourname) to verify professional credentials.");
+    formatScore -= 5;
+  }
+
+  if (!/github/i.test(resumeText) && detectedDomain === 'software') {
+    suggestions.push("Add your GitHub profile or portfolio link to showcase repositories and active code projects.");
+    formatScore -= 3;
+  }
+
   const verbsFound = ACTION_VERBS.filter(v => lower.includes(v));
-  if (verbsFound.length < 3) { suggestions.push('Use action verbs: built, led, optimized.'); formatScore -= 10; }
-  const hasNumbers = /\d+\s*%|\d+x\b|\$\s*\d+|\d[\d,]+\s*(users|clients|projects|members)/i.test(resumeText);
-  if (!hasNumbers) { suggestions.push("Quantify: 'Improved by 30%' or 'Led 5 engineers'."); formatScore -= 8; }
+  if (verbsFound.length < 3) {
+    suggestions.push("Use strong action verbs (e.g., Engineered, Spearheaded, Optimized, Delivered) at the start of bullet points.");
+    formatScore -= 10;
+  }
+
+  const hasNumbers = /\d+\s*%|\d+x\b|\$\s*\d+|\d[\d,]+\s*(users|clients|projects|members|downloads)/i.test(resumeText);
+  if (!hasNumbers) {
+    suggestions.push("Include measurable impact and metrics (e.g. 'Boosted performance by 35%', 'Managed team of 4').");
+    formatScore -= 8;
+  }
   formatScore = Math.max(formatScore, 0);
   const atsScore = Math.round((keywordScore * 0.4) + (sectionScore * 0.3) + (formatScore * 0.3));
   return {

@@ -134,7 +134,7 @@ const Home = () => {
 
       {/* ATS Checker Section */}
       <section id="checker" className="py-24 px-4 bg-white relative scroll-mt-20">
-        <div className="max-w-5xl mx-auto">
+        <div className="w-full max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 mb-2">Analyze Your Resume</h2>
             <div className="h-1 w-16 bg-primary-600 mx-auto rounded-full mb-4"></div>
@@ -142,7 +142,7 @@ const Home = () => {
               Our AI engine simulates major ATS software to give you real-world results.
             </p>
           </div>
-          <div className="bg-gray-50 rounded-3xl p-4 md:p-8 shadow-inner border border-gray-100">
+          <div className="bg-gray-50/80 rounded-3xl p-6 sm:p-10 shadow-sm border border-gray-200/80 w-full">
             <ATSChecker />
           </div>
         </div>
