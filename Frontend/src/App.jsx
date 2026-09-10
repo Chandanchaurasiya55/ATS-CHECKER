@@ -34,7 +34,7 @@ const AdminRoute = ({ children }) => {
   const location = useLocation();
   
   if (loading) return null;
-  if (!user?.isAdmin) return <Navigate to={`/admin/login?redirect=${encodeURIComponent(location.pathname + location.search)}`} />;
+  if (!user?.isAdmin) return <Navigate to={`/admin/login404?redirect=${encodeURIComponent(location.pathname + location.search)}`} />;
   
   return children;
 };
@@ -64,6 +64,7 @@ const AppContent = () => {
             <Route path="/recruitment" element={<Recruitment />} />
             <Route path="/higher-education" element={<HigherEducation />} />
             <Route path="/career-coaches" element={<CareerCoaches />} />
+            <Route path="/admin/login" element={<Navigate to="/admin/login404" replace />} />
             <Route path="/admin/login404" element={<AdminLogin />} />
             <Route path="/admin/register" element={<AdminRegister />} />
             <Route 

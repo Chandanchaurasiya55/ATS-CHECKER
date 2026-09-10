@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  checkAdminExists,
   registerAdmin,
   loginAdmin,
   getAdminOverview,
@@ -21,6 +22,7 @@ import { protect, admin } from '../middleware/auth.js';
 
 const router = express.Router();
 
+router.get('/check-admin', checkAdminExists);
 router.post('/register', registerAdmin);
 router.post('/login', loginAdmin);
 router.get('/overview', protect, admin, getAdminOverview);

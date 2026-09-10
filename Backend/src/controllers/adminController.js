@@ -5,6 +5,18 @@ import Payment from '../models/Payment.js';
 import Inquiry from '../models/Inquiry.js';
 import { generateToken } from '../middleware/auth.js';
 
+export const checkAdminExists = async (req, res) => {
+  try {
+    const adminExists = await User.exists({ role: 'admin' });
+    res.json({
+      success: true,
+      adminExists: !!adminExists,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const registerAdmin = async (req, res) => {
   try {
     const { name, email, password } = req.body;

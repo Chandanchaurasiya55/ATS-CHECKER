@@ -323,7 +323,7 @@ const AdminPanel = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/admin/login');
+    navigate('/admin/login404');
   };
 
   // Filtered Users (Search ONLY here)

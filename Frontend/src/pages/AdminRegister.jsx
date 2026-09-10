@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -10,8 +10,33 @@ const AdminRegister = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let isMounted = true;
+    const checkAdmin = async () => {
+      try {
+        const res = await api.get('/admin/check-admin');
+        if (isMounted) {
+          if (res.data?.adminExists) {
+            toast.error('Admin account already exists. Please sign in.');
+            navigate('/admin/login404', { replace: true });
+            return;
+          }
+          setCheckingAdmin(false);
+        }
+      } catch (error) {
+        console.error('Failed to check admin status', error);
+        if (isMounted) setCheckingAdmin(false);
+      }
+    };
+    checkAdmin();
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,6 +52,14 @@ const AdminRegister = () => {
       setLoading(false);
     }
   };
+
+  if (checkingAdmin) {
+    return (
+      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-[#f9fbff]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-12 bg-[#f9fbff]">

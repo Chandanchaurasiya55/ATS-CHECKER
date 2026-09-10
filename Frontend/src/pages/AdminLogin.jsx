@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
@@ -10,8 +10,32 @@ const AdminLogin = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [adminExists, setAdminExists] = useState(true);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let isMounted = true;
+    const checkAdmin = async () => {
+      try {
+        const res = await api.get('/admin/check-admin');
+        if (isMounted && res.data) {
+          setAdminExists(Boolean(res.data.adminExists));
+        }
+      } catch (error) {
+        console.error('Failed to check admin status', error);
+      } finally {
+        if (isMounted) {
+          setCheckingAdmin(false);
+        }
+      }
+    };
+    checkAdmin();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -88,12 +112,14 @@ const AdminLogin = () => {
             </button>
           </form>
 
-          <div className="mt-8 text-center text-gray-600">
-            <p>Need to onboard the admin?</p>
-            <Link to="/admin/register" className="text-primary-600 font-bold hover:text-primary-700">
-              Register admin
-            </Link>
-          </div>
+          {!checkingAdmin && !adminExists && (
+            <div className="mt-8 text-center text-gray-600">
+              <p>Need to onboard the admin?</p>
+              <Link to="/admin/register" className="text-primary-600 font-bold hover:text-primary-700">
+                Register admin
+              </Link>
+            </div>
+          )}
         </div>
       </motion.div>
     </div>
