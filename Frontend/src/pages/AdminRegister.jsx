@@ -105,7 +105,7 @@ const AdminRegister = () => {
 
           <div className="mt-8 text-center text-gray-600">
             <p>Already have admin access?</p>
-            <Link to="/admin/login" className="text-primary-600 font-bold hover:text-primary-700">
+            <Link to="/admin/login404" className="text-primary-600 font-bold hover:text-primary-700">
               Login as admin
             </Link>
           </div>
