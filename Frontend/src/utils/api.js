@@ -4,7 +4,7 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || (
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:5000/api'
-      : 'https://ats-checker-yybl.onrender.com/api'
+      : 'https://ats-checker-2r5j.onrender.com/api'
   ),
   headers: {
     'Content-Type': 'application/json',
